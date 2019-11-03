@@ -4,7 +4,9 @@ Prerequisites:
      - python2.7 or later with its path environment set
      - npm : https://www.npmjs.com/
      - windows build tools(for node-gyp) : https://github.com/nodejs/node-gyp
-     - ffmpeg : https://www.ffmpeg.org/download.html
+     - Chocolatey(for FFMPEG) : https://chocolatey.org/install
+      - FFMPEG : use choco install ffmpeg, to install once chocolately is installed.
+                    Alternatively, you can FFMPEG directly https://www.ffmpeg.org/ but the environment path must be set manually
 
 Once installed the following npm packages can be installed with : npm discord.js ffmpeg node-opus
 
