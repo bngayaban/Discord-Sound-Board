@@ -26,8 +26,6 @@ client.on("disconnect", () =>{
 
 // !help command, message event + message object
 client.on("message", msg => {
-    const msgToLower = msg.content.toLowerCase();
-    const helpCommand = "!help";
     const soundBoardPrefix = "!sb"
     const voiceChannel = msg.member.voiceChannel;
 
@@ -49,9 +47,6 @@ client.on("message", msg => {
                 voiceChannel.leave();
                 });
             }).catch(err => console.log(err));
-    if (msgToLower === helpCommand){
-        msg.reply("This bot doesn't use any command at all, apart from the !help command.");
-    }
 });
 
 
