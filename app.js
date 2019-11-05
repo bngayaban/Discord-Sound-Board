@@ -24,10 +24,14 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
+var isReady = true;
+
 // !help command, message event + message object
 client.on("message", msg => {
     const soundBoardPrefix = "!sb"
     const voiceChannel = msg.member.voiceChannel;
+    const sfx = ["overconfidence.mp3", "triple.mp3", "dio.mp3", "StillAlive.mp3"];
+    if(!isReady) return;
 
     if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
 
@@ -39,14 +43,28 @@ client.on("message", msg => {
     const args = msg.content.slice(soundBoardPrefix.length).split(/ +/);
     const command = args.shift().toLowerCase();
 
+    if(args.length != 1)
+    {
+        return msg.channel.send("This command requires one arguement.");
+    }
+
+    let index = sfx.findIndex(element => element.includes(args[0]));
+    if(index == -1)
+    {
+        return msg.channel.send(`Song ${args[0]} not found.`);
+    }
+
+    isReady = false;
     //attempt to connect to voice channel
     voiceChannel.join().then(connection =>
         {
-            const dispatcher = connection.playFile('./Audio/StillAlive.mp3');
+
+            const dispatcher = connection.playFile(`./Audio/${sfx[index]}`);
             dispatcher.on("end", end => {
                 voiceChannel.leave();
                 });
             }).catch(err => console.log(err));
+    isReady = true;
 });
 
 
