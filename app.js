@@ -1,6 +1,10 @@
 // Require discord.js package
 const Discord = require("discord.js");
 
+const path = './Audio/';
+
+const fs = require('fs');
+
 // Create a new client using the new keyword
 const client = new Discord.Client();
 
@@ -24,13 +28,13 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
-var isReady = true;
+let isReady = true;
 
 // !help command, message event + message object
 client.on("message", msg => {
     const soundBoardPrefix = "!sb"
     const voiceChannel = msg.member.voiceChannel;
-    const sfx = ["overconfidence.mp3", "triple.mp3", "dio.mp3", "StillAlive.mp3"];
+    const sfx = ["overconfidence.mp3", "triple.mp3", "dio.mp3", "StillAlive.mp3", "Level.ogg"];
     if(!isReady) return;
 
     if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
@@ -48,7 +52,7 @@ client.on("message", msg => {
         return msg.channel.send("This command requires one arguement.");
     }
 
-    let index = sfx.findIndex(element => element.includes(args[0]));
+    let index = sfx.findIndex(element => element.includes(args[0])); // https://stackoverflow.com/a/52124191
     if(index == -1)
     {
         return msg.channel.send(`Song ${args[0]} not found.`);
@@ -59,7 +63,7 @@ client.on("message", msg => {
     voiceChannel.join().then(connection =>
         {
 
-            const dispatcher = connection.playFile(`./Audio/${sfx[index]}`);
+            const dispatcher = connection.playFile(`${path}${sfx[index]}`);
             dispatcher.on("end", end => {
                 voiceChannel.leave();
                 });
