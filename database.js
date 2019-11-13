@@ -16,21 +16,26 @@ function dbInitialize(){
 }
 
 function dbPopulate(err){
-    let sql = "INSERT OR IGNORE INTO audio (fileName) VALUES ";
+    let sql = "INSERT INTO audio (fileName, tags) " + 
+              "VALUES (?, ?)";
     if(err) {
         console.error(err.message);
     }
     else {
         const files = fs.readdirSync(folder);
-        const placeholders = files.map((file) => '(?)').join(',');
-        
-        sql += placeholders;
-        db.run(sql, files, (err) => {
-            if(err) {
-                return console.error(err.message);
-            }
-            console.log(`Rows inserted ${this.changes}`);
-        });
+        const filesNoExt = files.map((file) => {return file.split('.').slice(0, -1).join('.')}); //https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
+
+        const statement = db.prepare(sql); // https://stackoverflow.com/a/57839315
+
+        for(let i = 0; i < files.length; i++) {
+            statement.run([].concat(files[i], filesNoExt[i]), (err) => {
+                if (err) {
+                    console.error(err.message);
+                }            
+            });
+        }
+
+        statement.finalize();
     }
 
 }
