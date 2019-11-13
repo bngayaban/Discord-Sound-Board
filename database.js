@@ -16,7 +16,7 @@ function dbInitialize(){
 }
 
 function dbPopulate(err){
-    let sql = "INSERT INTO audio (fileName, tags) " + 
+    let sql = "INSERT OR IGNORE INTO  audio (fileName, tags) " + 
               "VALUES (?, ?)";
     if(err) {
         console.error(err.message);
@@ -41,13 +41,13 @@ function dbPopulate(err){
 }
 
 function dbRead(fileName) {
-    const sql = `SELECT fileName FROM audio WHERE fileName = (?) OR tags = (?) LIMIT 1`;
+    const sql = `SELECT fileName name FROM audio WHERE fileName = (?) OR tags = (?) LIMIT 1`;
 
-    db.get(sql, [fileName, fileName], (err) => {
+    db.get(sql, [fileName, fileName], (err, row) => {
         if(err) {
-            return console.error(err.message);
+            console.error(err.message);
         }
-        console.log(`Rows inserted ${this.changes}`);
+        return row ? row.name : -1;
     });
 }
 
