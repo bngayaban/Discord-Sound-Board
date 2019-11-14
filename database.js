@@ -37,11 +37,10 @@ function dbPopulate(err){
 
         statement.finalize();
     }
-
 }
 
 function dbRead(fileName) {
-    const sql = `SELECT fileName name FROM audio WHERE fileName = (?) OR tags = (?) LIMIT 1`;
+    const sql = "SELECT fileName name FROM audio WHERE fileName = (?) OR tags = (?) LIMIT 1";
 
     db.get(sql, [fileName, fileName], (err, row) => {
         if(err) {
@@ -51,4 +50,23 @@ function dbRead(fileName) {
     });
 }
 
+function dbChangeTag(oldTagName, newTagName) {
+    const sql = "UPDATE audio SET tags = (?) WHERE tags = (?)";
+    db.run(sql, [newTagName, oldTagName], (err) => {
+        if(err) {
+            console.log(err.message);
+
+        }
+        else {
+            console.log("dbChangeTag: Changed " + oldTagName + " to " + newTagName);
+        }
+    });
+}
+
+// https://jamesmccaffrey.wordpress.com/2019/01/31/calling-functions-from-another-file-in-node-js/
+module.exports = {
+    dbInitialize,
+    dbRead,
+    dbChangeTag
+};
 dbInitialize();
