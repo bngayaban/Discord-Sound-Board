@@ -1,6 +1,6 @@
 // Require discord.js package
 const Discord = require("discord.js");
-
+const Database = require("./database.js");
 const path = './Audio/';
 
 const fs = require('fs');
@@ -16,6 +16,7 @@ const {
 // Display a message once the bot has started
 client.on("ready", () =>{
     console.log(`Logged in as ${client.user.tag}!`);
+    Database.dbInitialize();
 });
 
 // When the bot is reconnecting to the websocket
@@ -34,7 +35,7 @@ let isReady = true;
 client.on("message", msg => {
     const soundBoardPrefix = "!sb"
     const voiceChannel = msg.member.voiceChannel;
-    const sfx = ["overconfidence.mp3", "triple.mp3", "dio.mp3", "StillAlive.mp3", "Level.ogg"];
+
     if(!isReady) return;
 
     if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
@@ -43,32 +44,35 @@ client.on("message", msg => {
     {
         return msg.reply('you need to be in a voice channel to use.');
     }
-
-    const args = msg.content.slice(soundBoardPrefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
+    console.log(msg.content);
+    const args = msg.content.slice(soundBoardPrefix.length).split(" ").filter(x => x); //removes the soundboard prefix and seperates by spaces
+    console.log(args);
+    const sfx = args[0].toLowerCase(); // makes song case insensitive
 
     if(args.length != 1)
     {
         return msg.channel.send("This command requires one arguement.");
     }
 
-    let index = sfx.findIndex(element => element.includes(args[0])); // https://stackoverflow.com/a/52124191
-    if(index == -1)
-    {
-        return msg.channel.send(`Song ${args[0]} not found.`);
-    }
-
-    isReady = false;
-    //attempt to connect to voice channel
-    voiceChannel.join().then(connection =>
+    Database.dbRead(sfx, (sfxFile) => {
+        if(sfxFile === null)
         {
-
-            const dispatcher = connection.playFile(`${path}${sfx[index]}`);
-            dispatcher.on("end", end => {
-                voiceChannel.leave();
-                });
-            }).catch(err => console.log(err));
-    isReady = true;
+            return msg.channel.send(`Song ${args[0]} not found.`);
+        }
+        else {
+            isReady = false;
+            //attempt to connect to voice channel
+            voiceChannel.join().then(connection =>
+            {
+    
+                const dispatcher = connection.playFile(`${path}${sfxFile}`);
+                dispatcher.on("end", end => {
+                    voiceChannel.leave();
+                    });
+                }).catch(err => console.log(err));
+            isReady = true;
+        }   
+    });  
 });
 
 
