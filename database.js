@@ -23,7 +23,7 @@ function dbPopulate(err){
     }
     else {
         const files = fs.readdirSync(folder);
-        const filesNoExt = files.map((file) => {return file.split('.').slice(0, -1).join('.')}); //https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
+        const filesNoExt = files.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()}); //https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
 
         const statement = db.prepare(sql); // https://stackoverflow.com/a/57839315
 
@@ -36,6 +36,7 @@ function dbPopulate(err){
         }
 
         statement.finalize();
+        console.log("Database Initalized");
     }
 }
 
@@ -69,4 +70,4 @@ module.exports = {
     dbRead,
     dbChangeTag
 };
-dbInitialize();
+//dbInitialize();
