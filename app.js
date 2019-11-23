@@ -36,6 +36,7 @@ client.on("message", msg => {
     const soundBoardPrefix = "!sb";
     const commandPrefix = "--";
     const voiceChannel = msg.member.voiceChannel;
+    const messageChannel = msg.channel;
 
     if(!isReady) return;
 
@@ -46,31 +47,50 @@ client.on("message", msg => {
         return msg.reply('you need to be in a voice channel to use.');
     }
     console.log(msg.content);
-    const args = msg.content.slice(soundBoardPrefix.length).split(" ").filter(x => x); //removes the soundboard prefix and seperates by spaces
+    const args = msg.content.slice(soundBoardPrefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
     console.log(args);
-    const sfx = args[0].toLowerCase(); // makes song case insensitive
+    const sfx = args[0];
 
-    if(args[0].startsWith(commandPrefix)) {
+    if(args.length < 1) {
+        return messageChannel.send("One or more arguments missing. Type: !sb --help for more information.");
+    }
+    else if(args[0].startsWith(commandPrefix)) { //run a command
         const command = args[0].slice(commandPrefix.length);
 
         if(command === "help")
-            return msg.channel.send("This is the help command.");
+            return messageChannel.send("This is the help command.");
+        
+        if(command === "update")
+        {
+            if(args.length != 3)
+                return messageChannel.send("Update requires 3 arguments");
+            else
+                return updateTag(args[1], args[2], messageChannel);
+        }
+            
+    }
+    else {
+        playSong(sfx, messageChannel, args[0], voiceChannel);
     }
 
-    if(args.length != 1)
-    {
-        return msg.channel.send("This command requires one arguement.");
-    }
-
-    //playSong(sfx, msg, args[0], voiceChannel);
-      
 });
 
-function playSong(sfx, msg, sfxName, voiceChannel) {
+function updateTag(oldTag, newTag, messageChannel){
+    Database.dbRead(oldTag, (tagName) => {
+        if(tagName === null) {
+            return messageChannel.send("Audio file not found.");
+        }
+        else {
+            Database.dbChangeTag(oldTag, newTag);
+        }
+    });
+}
+
+function playSong(sfx, messageChannel, sfxName, voiceChannel) {
     Database.dbRead(sfx, (sfxFile) => {
         if(sfxFile === null)
         {
-            return msg.channel.send(`Song ${sfxName} not found.`);
+            return messageChannel.send(`Song ${sfxName} not found.`);
         }
         else {
             isReady = false;
