@@ -50,12 +50,19 @@ client.on("message", msg => {
     console.log(args);
     const sfx = args[0].toLowerCase(); // makes song case insensitive
 
+    if(args[0].startsWith(commandPrefix)) {
+        const command = args[0].slice(commandPrefix.length);
+
+        if(command === "help")
+            return msg.channel.send("This is the help command.");
+    }
+
     if(args.length != 1)
     {
         return msg.channel.send("This command requires one arguement.");
     }
 
-    playSong(sfx, msg, args[0], voiceChannel);
+    //playSong(sfx, msg, args[0], voiceChannel);
       
 });
 
