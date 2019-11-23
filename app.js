@@ -33,7 +33,8 @@ let isReady = true;
 
 // !help command, message event + message object
 client.on("message", msg => {
-    const soundBoardPrefix = "!sb"
+    const soundBoardPrefix = "!sb";
+    const commandPrefix = "--";
     const voiceChannel = msg.member.voiceChannel;
 
     if(!isReady) return;
@@ -54,10 +55,15 @@ client.on("message", msg => {
         return msg.channel.send("This command requires one arguement.");
     }
 
+    playSong(sfx, msg, args[0], voiceChannel);
+      
+});
+
+function playSong(sfx, msg, sfxName, voiceChannel) {
     Database.dbRead(sfx, (sfxFile) => {
         if(sfxFile === null)
         {
-            return msg.channel.send(`Song ${args[0]} not found.`);
+            return msg.channel.send(`Song ${sfxName} not found.`);
         }
         else {
             isReady = false;
@@ -72,10 +78,8 @@ client.on("message", msg => {
                 }).catch(err => console.log(err));
             isReady = true;
         }   
-    });  
-});
-
-
+    });
+}
 
 // Log in the bot with the token
 client.login(token);
