@@ -80,15 +80,16 @@ client.on("message", msg => {
 
 });
 
-function updateTag(oldTag, newTag, messageChannel){
-    Database.dbRead(oldTag, (tagName) => {
-        if(tagName === null) {
-            return messageChannel.send("Audio file not found.");
-        }
-        else {
-            Database.dbChangeTag(oldTag, newTag);
-        }
-    });
+function listSongs(messageChannel) {
+    
+}
+
+async function updateTag(oldTag, newTag, messageChannel){
+    const changedRows = await Database.update({ tags: newTag}, {where: { tags: oldTag}});
+    if(changedRows > 0) {
+        return messageChannel.send(`Tag ${oldTag} was updated to ${newTag}`);
+    }
+        return messageChannel.send(`Tag ${oldTag} not found.`);
 }
 
 async function playSong(sfx, messageChannel, sfxName, voiceChannel) {
