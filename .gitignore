@@ -8,3 +8,5 @@ token.json
 bot ID.txt
 
 Database/audio.db
+
+*.sqlite
