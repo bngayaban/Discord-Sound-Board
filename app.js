@@ -35,7 +35,7 @@ let isReady = true;
 client.on("message", msg => {
     const soundBoardPrefix = "!sb";
     const commandPrefix = "--";
-    const voiceChannel = msg.member.voiceChannel;
+    const voiceChannel = msg.member.voice.channel;
     const messageChannel = msg.channel;
 
     if(!isReady) return;
@@ -98,8 +98,8 @@ function playSong(sfx, messageChannel, sfxName, voiceChannel) {
             voiceChannel.join().then(connection =>
             {
     
-                const dispatcher = connection.playFile(`${path}${sfxFile}`);
-                dispatcher.on("end", end => {
+                const dispatcher = connection.play(`${path}${sfxFile}`);
+                dispatcher.on("finish", end => {
                     voiceChannel.leave();
                     });
                 }).catch(err => console.log(err));

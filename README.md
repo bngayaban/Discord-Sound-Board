@@ -7,7 +7,9 @@ Prerequisites:
      - Chocolatey(for FFMPEG) : https://chocolatey.org/install
       - FFMPEG : use choco install ffmpeg, to install once chocolately is installed.
                     Alternatively, you can FFMPEG directly https://www.ffmpeg.org/ but the environment path must be set manually
-
+*nix:
+     - install Node.js v12.x
+     - then install NPM
 Once installed the following npm packages can be installed with : npm discord.js ffmpeg node-opus
 
 - discord.js : all discord interactions
