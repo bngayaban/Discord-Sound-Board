@@ -10,12 +10,16 @@
     "Bryan",
     "Gayaban"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bngayaban/Discord-Sound-Board.git"
+  },
   "author": "Bryan Gayaban",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.5.1",
+    "discord.js": "^12.0.2",
     "ffmpeg": "0.0.4",
     "node-opus": "^0.3.3",
-    "sqlite3": "^4.1.0"
+    "sqlite3": "^4.1.1"
   }
 }

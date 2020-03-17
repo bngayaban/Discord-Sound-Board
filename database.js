@@ -31,7 +31,8 @@ function dbPopulate(err){
             statement.run([].concat(files[i], filesNoExt[i]), (err) => {
                 if (err) {
                     console.error(err.message);
-                }            
+                }
+                console.log("Added: ", files[i]);            
             });
         }
 
@@ -40,14 +41,14 @@ function dbPopulate(err){
     }
 }
 
-function dbRead(fileName) {
+function dbRead(fileName, callback) {
     const sql = "SELECT fileName name FROM audio WHERE fileName = (?) OR tags = (?) LIMIT 1";
 
     db.get(sql, [fileName, fileName], (err, row) => {
         if(err) {
             console.error(err.message);
         }
-        return row ? row.name : -1;
+        callback(row ? row.name : null);
     });
 }
 

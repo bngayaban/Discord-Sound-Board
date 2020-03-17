@@ -1,6 +1,6 @@
 // Require discord.js package
 const Discord = require("discord.js");
-
+const Database = require("./database.js");
 const path = './Audio/';
 
 const fs = require('fs');
@@ -16,6 +16,7 @@ const {
 // Display a message once the bot has started
 client.on("ready", () =>{
     console.log(`Logged in as ${client.user.tag}!`);
+    Database.dbInitialize();
 });
 
 // When the bot is reconnecting to the websocket
@@ -32,9 +33,11 @@ let isReady = true;
 
 // !help command, message event + message object
 client.on("message", msg => {
-    const soundBoardPrefix = "!sb"
-    const voiceChannel = msg.member.voiceChannel;
-    const sfx = ["overconfidence.mp3", "triple.mp3", "dio.mp3", "StillAlive.mp3", "Level.ogg"];
+    const soundBoardPrefix = "!sb";
+    const commandPrefix = "--";
+    const voiceChannel = msg.member.voice.channel;
+    const messageChannel = msg.channel;
+
     if(!isReady) return;
 
     if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
@@ -43,35 +46,67 @@ client.on("message", msg => {
     {
         return msg.reply('you need to be in a voice channel to use.');
     }
+    console.log(msg.content);
+    const args = msg.content.slice(soundBoardPrefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
+    console.log(args);
+    const sfx = args[0];
 
-    const args = msg.content.slice(soundBoardPrefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
-
-    if(args.length != 1)
-    {
-        return msg.channel.send("This command requires one arguement.");
+    if(args.length < 1) {
+        return messageChannel.send("One or more arguments missing. Type: !sb --help for more information.");
     }
+    else if(args[0].startsWith(commandPrefix)) { //run a command
+        const command = args[0].slice(commandPrefix.length);
 
-    let index = sfx.findIndex(element => element.includes(args[0])); // https://stackoverflow.com/a/52124191
-    if(index == -1)
-    {
-        return msg.channel.send(`Song ${args[0]} not found.`);
-    }
-
-    isReady = false;
-    //attempt to connect to voice channel
-    voiceChannel.join().then(connection =>
+        if(command === "help")
+            return messageChannel.send("This is the help command.");
+        
+        if(command === "update")
         {
+            if(args.length != 3)
+                return messageChannel.send("Update requires 3 arguments");
+            else
+                return updateTag(args[1], args[2], messageChannel);
+        }
+            
+    }
+    else {
+        playSong(sfx, messageChannel, args[0], voiceChannel);
+    }
 
-            const dispatcher = connection.playFile(`${path}${sfx[index]}`);
-            dispatcher.on("end", end => {
-                voiceChannel.leave();
-                });
-            }).catch(err => console.log(err));
-    isReady = true;
 });
 
+function updateTag(oldTag, newTag, messageChannel){
+    Database.dbRead(oldTag, (tagName) => {
+        if(tagName === null) {
+            return messageChannel.send("Audio file not found.");
+        }
+        else {
+            Database.dbChangeTag(oldTag, newTag);
+        }
+    });
+}
 
+function playSong(sfx, messageChannel, sfxName, voiceChannel) {
+    Database.dbRead(sfx, (sfxFile) => {
+        if(sfxFile === null)
+        {
+            return messageChannel.send(`Song ${sfxName} not found.`);
+        }
+        else {
+            isReady = false;
+            //attempt to connect to voice channel
+            voiceChannel.join().then(connection =>
+            {
+    
+                const dispatcher = connection.play(`${path}${sfxFile}`);
+                dispatcher.on("finish", end => {
+                    voiceChannel.leave();
+                    });
+                }).catch(err => console.log(err));
+            isReady = true;
+        }   
+    });
+}
 
 // Log in the bot with the token
 client.login(token);
