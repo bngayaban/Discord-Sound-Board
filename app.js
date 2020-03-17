@@ -17,7 +17,11 @@ const {
 // Display a message once the bot has started
 client.on("ready", () =>{
     console.log(`Logged in as ${client.user.tag}!`);
-    Database.dbInitialize();
+});
+
+
+client.once('ready', () => {
+    Database.sync();
 });
 
 // When the bot is reconnecting to the websocket
@@ -87,26 +91,24 @@ function updateTag(oldTag, newTag, messageChannel){
     });
 }
 
-function playSong(sfx, messageChannel, sfxName, voiceChannel) {
-    Database.dbRead(sfx, (sfxFile) => {
-        if(sfxFile === null)
+async function playSong(sfx, messageChannel, sfxName, voiceChannel) {
+    const sfxQuery = await Database.findOne({where:{[Op.or]: [{fileName: sfxName}, {tags: sfx}]} });
+    if(sfxQuery) {
+        const sfxFile = sfxQuery.get('fileName');
+        isReady = false;
+        //attempt to connect to voice channel
+        voiceChannel.join().then(connection =>
         {
-            return messageChannel.send(`Song ${sfxName} not found.`);
-        }
-        else {
-            isReady = false;
-            //attempt to connect to voice channel
-            voiceChannel.join().then(connection =>
-            {
-    
-                const dispatcher = connection.play(`${path}${sfxFile}`);
-                dispatcher.on("finish", end => {
-                    voiceChannel.leave();
-                    });
-                }).catch(err => console.log(err));
-            isReady = true;
-        }   
-    });
+            const dispatcher = connection.play(`${path}${sfxFile}`);
+            dispatcher.on("finish", end => {
+                voiceChannel.leave();
+                });
+            }).catch(err => console.log(err));
+        isReady = true;
+    }
+    else {
+        return messageChannel.send(`Song ${sfxName} not found.`);
+    }
 }
 
 // Log in the bot with the token
