@@ -9,7 +9,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
     storage: 'database.sqlite',
 });
 
-const Audio = sequelize.import('audio.js');
+const Audio = sequelize.import('models/audio.js');
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 

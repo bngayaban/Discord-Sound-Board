@@ -1,6 +1,7 @@
 // Require discord.js package
 const Discord = require("discord.js");
-const Database = require("./database.js");
+const Database = require("./dbObjects.js");
+const { Op } = require("sequelize");
 const path = './Audio/';
 
 const fs = require('fs');
