@@ -72,6 +72,10 @@ client.on("message", msg => {
             else
                 return updateTag(args[1], args[2], messageChannel);
         }
+
+        if(command === "list") {
+            return listSongs(messageChannel);
+        }
             
     }
     else {
@@ -80,8 +84,11 @@ client.on("message", msg => {
 
 });
 
-function listSongs(messageChannel) {
-    
+async function listSongs(messageChannel) {
+    const songs = await Database.findAll({attributes: ['tags']});
+    const songList = songs.map(s => s.tags).join(', ') || "No songs.";
+
+    return messageChannel.send(`List of songs: ${songList}`);
 }
 
 async function updateTag(oldTag, newTag, messageChannel){
