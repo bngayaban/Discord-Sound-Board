@@ -63,7 +63,7 @@ client.on("message", msg => {
         const command = args[0].slice(commandPrefix.length);
 
         if(command === "help")
-            return messageChannel.send("This is the help command.");
+            return messageChannel.send("Available Commands: --help --update --list --play" );
         
         if(command === "update")
         {
@@ -76,10 +76,16 @@ client.on("message", msg => {
         if(command === "list") {
             return listSongs(messageChannel);
         }
+
+        if(command === "play") {
+            console.log(sfx, args[1]);
+            return playSong(args[1], messageChannel, voiceChannel);
+        }
             
+        return messageChannel.send(`Command ${args[0]} not found. Try !sb --help for more options.`)
     }
     else {
-        playSong(sfx, messageChannel, args[0], voiceChannel);
+        playSong(sfx, messageChannel, voiceChannel);
     }
 
 });
@@ -99,8 +105,8 @@ async function updateTag(oldTag, newTag, messageChannel){
         return messageChannel.send(`Tag ${oldTag} not found.`);
 }
 
-async function playSong(sfx, messageChannel, sfxName, voiceChannel) {
-    const sfxQuery = await Database.findOne({where:{[Op.or]: [{fileName: sfxName}, {tags: sfx}]} });
+async function playSong(sfx, messageChannel, voiceChannel) {
+    const sfxQuery = await Database.findOne({where:{[Op.or]: [{fileName: sfx}, {tags: sfx}]} });
     if(sfxQuery) {
         const sfxFile = sfxQuery.get('fileName');
         isReady = false;
