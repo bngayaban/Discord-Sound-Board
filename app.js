@@ -121,7 +121,7 @@ async function playSong(sfx, messageChannel, voiceChannel) {
         isReady = true;
     }
     else {
-        return messageChannel.send(`Song ${sfxName} not found.`);
+        return messageChannel.send(`Song ${sfx} not found.`);
     }
 }
 

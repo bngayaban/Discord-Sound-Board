@@ -15,3 +15,11 @@ Once installed the following npm packages can be installed with : npm discord.js
 - discord.js : all discord interactions
 - ffmpeg : audio streaming
 - node-opus : audio codec
+
+
+TODO:
+ - update documentation
+ - future stuff
+   - add other folders to scan besides ./Audio
+   - permissions for changing tags
+   - give users option to add their own files??
