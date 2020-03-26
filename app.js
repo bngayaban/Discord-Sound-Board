@@ -34,7 +34,8 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
-let isReady = true;
+let queue = [];
+let dispatcher = "";
 
 // !help command, message event + message object
 client.on("message", msg => {
@@ -42,8 +43,6 @@ client.on("message", msg => {
     const commandPrefix = "--";
     const voiceChannel = msg.member.voice.channel;
     const messageChannel = msg.channel;
-
-    if(!isReady) return;
 
     if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
 
@@ -81,7 +80,13 @@ client.on("message", msg => {
             console.log(sfx, args[1]);
             return playSong(args[1], messageChannel, voiceChannel);
         }
-            
+
+        if(command === "skip") {
+            return skip(messageChannel);
+        }
+        
+        if(command === "stop")
+            return stop();
         return messageChannel.send(`Command ${args[0]} not found. Try !sb --help for more options.`)
     }
     else {
@@ -108,21 +113,59 @@ async function updateTag(oldTag, newTag, messageChannel){
 async function playSong(sfx, messageChannel, voiceChannel) {
     const sfxQuery = await Database.findOne({where:{[Op.or]: [{fileName: sfx}, {tags: sfx}]} });
     if(sfxQuery) {
-        const sfxFile = sfxQuery.get('fileName');
-        isReady = false;
-        //attempt to connect to voice channel
-        voiceChannel.join().then(connection =>
-        {
-            const dispatcher = connection.play(`${path}${sfxFile}`);
-            dispatcher.on("finish", end => {
-                voiceChannel.leave();
-                });
+        
+        queue.push(sfxQuery.get('fileName'));
+        messageChannel.send(`Sound ${sfx} added as ${queue.length}${ordinalInt(queue.length)} in queue.`);
+        if(!messageChannel.guild.voiceConnection)
+            voiceChannel.join().then(connection => {
+                if(queue.length == 1) play(connection, messageChannel, voiceChannel);
             }).catch(err => console.log(err));
-        isReady = true;
+        return;
     }
     else {
         return messageChannel.send(`Song ${sfxName} not found.`);
     }
+}
+
+async function skip(messageChannel) {
+    if(!queue.length)
+        return messageChannel.send("Queue is empty. No need to skip.");
+    else
+    {
+        if(dispatcher)
+            return dispatcher.end();
+    } 
+}
+
+async function stop() {
+    if(dispatcher)
+    {
+        queue = [];
+        dispatcher.end();
+    }
+}
+
+function ordinalInt(n)
+{
+    return [,'st','nd','rd'][n%100>>3^1&&n%10]||'th';
+} //https://stackoverflow.com/a/39466341
+
+
+async function play(connection, messageChannel, voiceChannel)
+{
+
+    dispatcher = connection.play(`${path}${queue[0]}`);
+    
+    
+    dispatcher.on("finish", end => {
+        queue.shift();
+        if(queue[0])
+            play(connection, messageChannel, voiceChannel);
+        else
+            connection.disconnect();
+    });
+
+
 }
 
 // Log in the bot with the token
