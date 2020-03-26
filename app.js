@@ -116,9 +116,11 @@ async function playSong(sfx, messageChannel, voiceChannel) {
         
         queue.push(sfxQuery.get('fileName'));
         messageChannel.send(`Sound ${sfx} added as ${queue.length}${ordinalInt(queue.length)} in queue.`);
-        if(!messageChannel.guild.voiceConnection)
+        console.log(messageChannel.guild.voice);
+
+        if(!messageChannel.guild.voice || !messageChannel.guild.voice.connection)// first way around need to check if voice exists, afterwards need to check if it's connected
             voiceChannel.join().then(connection => {
-                if(queue.length == 1) play(connection, messageChannel, voiceChannel);
+                play(connection, messageChannel, voiceChannel);
             }).catch(err => console.log(err));
         return;
     }
