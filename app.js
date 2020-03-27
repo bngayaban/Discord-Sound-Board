@@ -42,12 +42,10 @@ let nowPlaying = "";
 client.on("message", msg => {
     const soundBoardPrefix = "!sb";
     const commandPrefix = "--";
-    const voiceChannel = msg.member.voice.channel;
-    const messageChannel = msg.channel;
 
     if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
 
-    if(!voiceChannel)
+    if(!msg.member.voice.channel)
     {
         return msg.reply('you need to be in a voice channel to use.');
     }
@@ -57,93 +55,93 @@ client.on("message", msg => {
     const sfx = args[0];
 
     if(args.length < 1) {
-        return messageChannel.send("One or more arguments missing. Type: !sb --help for more information.");
+        return msg.channel.send("One or more arguments missing. Type: !sb --help for more information.");
     }
     else if(args[0].startsWith(commandPrefix)) { //run a command
         const command = args[0].slice(commandPrefix.length);
 
         if(command === "help")
-            return messageChannel.send("Available Commands: --help --update --list --play" );
+            return msg.channel.send("Available Commands: --help --update --list --play" );
         
         if(command === "update")
         {
             if(args.length != 3)
-                return messageChannel.send("Update requires 3 arguments");
+                return msg.channel.send("Update requires 3 arguments");
             else
-                return updateTag(args[1], args[2], messageChannel);
+                return updateTag(msg, args);
         }
 
         if(command === "list") {
-            return listSongs(messageChannel);
+            return listSongs(msg, args);
         }
 
         if(command === "play") {
             console.log(sfx, args[1]);
-            return playSong(args[1], messageChannel, voiceChannel);
+            return playSong(msg, args[1]);
         }
 
         if(command === "skip") {
-            return skip(messageChannel);
+            return skip(msg, args);
         }
         
         if(command === "stop")
-            return stop();
-        return messageChannel.send(`Command ${args[0]} not found. Try !sb --help for more options.`)
+            return stop(msg, args);
+        return msg.channel.send(`Command ${args[0]} not found. Try !sb --help for more options.`)
     }
     else {
-        playSong(sfx, messageChannel, voiceChannel);
+        return playSong(msg, args[0]);
     }
 
 });
 
-async function listSongs(messageChannel) {
+async function listSongs(message, args) {
     const songs = await Database.findAll({attributes: ['tags']});
     const songList = songs.map(s => s.tags).join(', ') || "No songs.";
 
-    return messageChannel.send(`List of songs: ${songList}`);
+    return message.channel.send(`List of songs: ${songList}`);
 }
 
-async function updateTag(oldTag, newTag, messageChannel){
+async function updateTag(message, args){
+    let oldTag = args[1];
+    let newTag = args[2];
     const changedRows = await Database.update({ tags: newTag}, {where: { tags: oldTag}});
+
     if(changedRows > 0) {
-        return messageChannel.send(`Tag ${oldTag} was updated to ${newTag}`);
+        return message.channel.send(`Tag ${oldTag} was updated to ${newTag}`);
     }
-        return messageChannel.send(`Tag ${oldTag} not found.`);
+        return message.channel.send(`Tag ${oldTag} not found.`);
 }
 
-async function playSong(sfx, messageChannel, voiceChannel) {
+async function playSong(message, args) {
+    let sfx = args;
     const sfxQuery = await Database.findOne({where:{[Op.or]: [{fileName: sfx}, {tags: sfx}]} });
     if(sfxQuery) {
-        
         queue.push(sfxQuery.get('fileName'));
         console.log(queue);
         if(nowPlaying)
-            messageChannel.send(`Sound ${sfx} added as ${queue.length}${ordinalInt(queue.length)} in queue.`);
+            message.channel.send(`Sound ${sfx} added as ${queue.length}${ordinalInt(queue.length)} in queue.`);
 
-            console.log(messageChannel.guild.voice);
+            console.log(message.channel.guild.voice);
 
-        if(!messageChannel.guild.voice || !messageChannel.guild.voice.connection)// first way around need to check if voice exists, afterwards need to check if it's connected
-            voiceChannel.join().then(connection => {
-                play(connection, messageChannel, voiceChannel);
+        if(!message.channel.guild.voice || !message.channel.guild.voice.connection)// first way around need to check if voice exists, afterwards need to check if it's connected
+            message.member.voice.channel.join().then(connection => {
+                play(connection, message.channel, message.member.voice.channel);
             }).catch(err => console.log(err));
         return;
     }
     else {
-        return messageChannel.send(`Song ${sfxName} not found.`);
+        return message.channel.send(`Song ${sfx} not found.`);
     }
 }
 
-async function skip(messageChannel) {
-    if(!queue.length)
-        return messageChannel.send("Queue is empty. No need to skip.");
+async function skip(message, args) {
+    if(dispatcher)
+        return dispatcher.end();
     else
-    {
-        if(dispatcher)
-            return dispatcher.end();
-    } 
+        return message.channel.send("Queue is empty. No need to skip.");
 }
 
-async function stop() {
+async function stop(message, args) {
     if(dispatcher)
     {
         queue = [];
