@@ -36,6 +36,7 @@ client.on("disconnect", () =>{
 
 let queue = [];
 let dispatcher = "";
+let nowPlaying = "";
 
 // !help command, message event + message object
 client.on("message", msg => {
@@ -115,8 +116,11 @@ async function playSong(sfx, messageChannel, voiceChannel) {
     if(sfxQuery) {
         
         queue.push(sfxQuery.get('fileName'));
-        messageChannel.send(`Sound ${sfx} added as ${queue.length}${ordinalInt(queue.length)} in queue.`);
-        console.log(messageChannel.guild.voice);
+        console.log(queue);
+        if(nowPlaying)
+            messageChannel.send(`Sound ${sfx} added as ${queue.length}${ordinalInt(queue.length)} in queue.`);
+
+            console.log(messageChannel.guild.voice);
 
         if(!messageChannel.guild.voice || !messageChannel.guild.voice.connection)// first way around need to check if voice exists, afterwards need to check if it's connected
             voiceChannel.join().then(connection => {
@@ -143,6 +147,7 @@ async function stop() {
     if(dispatcher)
     {
         queue = [];
+        nowPlaying = "";
         dispatcher.end();
     }
 }
@@ -157,14 +162,18 @@ async function play(connection, messageChannel, voiceChannel)
 {
 
     dispatcher = connection.play(`${path}${queue[0]}`);
-    
+    nowPlaying = queue[0];
+    queue.shift();
     
     dispatcher.on("finish", end => {
-        queue.shift();
         if(queue[0])
             play(connection, messageChannel, voiceChannel);
         else
+        {
+            nowPlaying = "";
             connection.disconnect();
+        }
+
     });
 
 
