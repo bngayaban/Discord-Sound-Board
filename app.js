@@ -52,7 +52,6 @@ var servers = {};
 // !help command, message event + message object
 client.on("message", message => {
     const soundBoardPrefix = "!sb";
-    const commandPrefix = "--";
 
     if(!message.content.startsWith(soundBoardPrefix) || message.author.bot) return;
 
@@ -66,10 +65,11 @@ client.on("message", message => {
 
     command = args.shift();
     console.log(args);
-    if(!client.commands.has(command)) return;
+    if(!client.commands.has(command)) 
+        return client.commands.get('play').execute(message, command, servers);
 
     try {
-        client.commands.get(command).execute(message, args);
+        client.commands.get(command).execute(message, args, servers);
     } catch(error) {
         console.error(error);
         message.reply('There was an error trying to execute that command');

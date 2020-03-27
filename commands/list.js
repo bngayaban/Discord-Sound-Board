@@ -1,3 +1,5 @@
+const Database = require("../dbObjects.js");
+
 async function listSongs(message, args) {
     const songs = await Database.findAll({attributes: ['tags']});
     const songList = songs.map(s => s.tags).join(', ') || "No songs.";
