@@ -14,7 +14,10 @@ async function updateTag(message, args){
 
 module.exports = {
     name: 'update',
-    description: 'Update',
+    description: 'Update tag to a new tag.',
+    args: true,
+    numArgs: 2,
+    usage: '<old tag> <new tag>',
     execute(message, args) {
         if(args.length != 2) {
             return message.channel.send("Update requires 2 arguments.");

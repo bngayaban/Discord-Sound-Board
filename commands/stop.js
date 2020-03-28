@@ -14,6 +14,7 @@ async function stop(message, args, servers) {
 module.exports = {
     name: 'stop',
     description: 'Stops the player',
+    voice: true,
     execute(message, args, servers) {
         return stop(message, args, servers);
     },

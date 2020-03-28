@@ -48,26 +48,43 @@ client.on("message", message => {
 
     if(!message.content.startsWith(soundBoardPrefix) || message.author.bot) return;
 
-    if(!message.member.voice.channel)
-    {
-        return message.reply('you need to be in a voice channel to use.');
-    }
     console.log(message.content);
     const args = message.content.slice(soundBoardPrefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
     console.log(args);
 
-    let commandName = args.shift();
+    const commandName = args.shift();
     console.log(args);
-    if(!client.commands.has(commandName)) 
-        return client.commands.get('play').execute(message, commandName, servers);
 
-    try {
-        client.commands.get(commandName).execute(message, args, servers);
-    } catch(error) {
-        console.error(error);
-        message.reply('There was an error trying to execute that command');
+    // If no command try playing it
+    if(!client.commands.has(commandName)) {
+        if(message.member.voice.channel) {
+            return client.commands.get('play').execute(message, commandName, servers);
+        } else {
+            return message.reply('you need to be in a voice channel to use.');
+        }
+    }
+        
+    const command = client.commands.get(commandName);
+
+    if (command.args && command.numArgs != args.length) {
+        let reply = `Command requires ${command.numArgs} arguments.`;
+
+        if (command.usage) {
+            reply += `\n Proper usage would be: ${soundBoardPrefix} ${command.name} ${command.usage}`;
+        }
+        return message.channel.send(reply);
     }
 
+    if(command.voice && !message.member.voice.channel) {
+        return message.reply('You need to be in a voice channel to use.');
+    }
+
+    try {
+        command.execute(message, args, servers);
+    } catch(error) {
+        console.error(error);
+        message.reply('There was an error trying to execute that command.');
+    }
 });
 
 // Log in the bot with the token

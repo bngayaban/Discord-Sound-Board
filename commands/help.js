@@ -21,13 +21,13 @@ function help(message, args) {
 
     if(command.description) data.push(`Description: ${command.description}`);
 
-
     message.channel.send(data, {split: true});
 }
 
 module.exports = {
     name: 'help',
     description: 'List all available commands or info about a specific command.',
+    usage: '<command name>',
     execute(message, args) {
         return help(message, args);
     },

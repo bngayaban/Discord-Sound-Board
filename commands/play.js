@@ -55,6 +55,10 @@ async function playSong(message, args, servers) {
 module.exports = {
     name: 'play',
     description: 'Play a sound',
+    args: true,
+    numArgs: 1,
+    usage: '<sound name>',
+    voice: true,
     execute(message, args, servers) {
         return playSong(message, args, servers);
     },
