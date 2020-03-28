@@ -1,13 +1,15 @@
 const Database = require("../dbObjects.js");
 const { Op } = require("sequelize");
-const path = './Audio/';
+const {audioDirectory} = require('../config.js');
+
+
 
 function ordinalInt(n) {
     return [,'st','nd','rd'][n%100>>3^1&&n%10]||'th';
 } //https://stackoverflow.com/a/39466341
 
 async function play(connection, messageChannel, voiceChannel, server) {
-    server.dispatcher = connection.play(`${path}${server.queue[0]}`);
+    server.dispatcher = connection.play(`${audioDirectory}${server.queue[0]}`);
     server.nowPlaying = server.queue[0];
     server.queue.shift();
     

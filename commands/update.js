@@ -1,8 +1,8 @@
 const Database = require("../dbObjects.js");
 
 async function updateTag(message, args){
-    let oldTag = args[0];
-    let newTag = args[1];
+    const oldTag = args[0];
+    const newTag = args[1];
     const changedRows = await Database.update({ tags: newTag}, {where: { tags: oldTag}});
 
     if(changedRows > 0) {
@@ -19,9 +19,6 @@ module.exports = {
     numArgs: 2,
     usage: '<old tag> <new tag>',
     execute(message, args) {
-        if(args.length != 2) {
-            return message.channel.send("Update requires 2 arguments.");
-        }
-        else return updateTag(message, args);
+        return updateTag(message, args);
     },
 }

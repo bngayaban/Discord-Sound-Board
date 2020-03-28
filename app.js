@@ -17,14 +17,14 @@ for(const file of commandFiles) {
 
 // Accessing the token ./token.json
 const {
-    token
-} = require("./token.json");
+    token,
+    prefix
+} = require("./config.js");
 
 // Display a message once the bot has started
 client.on("ready", () =>{
     console.log(`Logged in as ${client.user.tag}!`);
 });
-
 
 client.once('ready', () => {
     Database.sync();
@@ -44,12 +44,10 @@ let servers = {};
 
 // !help command, message event + message object
 client.on("message", message => {
-    const soundBoardPrefix = "!sb";
-
-    if(!message.content.startsWith(soundBoardPrefix) || message.author.bot) return;
+    if(!message.content.startsWith(prefix) || message.author.bot) return;
 
     console.log(message.content);
-    const args = message.content.slice(soundBoardPrefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
+    const args = message.content.slice(prefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
     console.log(args);
 
     const commandName = args.shift();
@@ -70,7 +68,7 @@ client.on("message", message => {
         let reply = `Command requires ${command.numArgs} arguments.`;
 
         if (command.usage) {
-            reply += `\n Proper usage would be: ${soundBoardPrefix} ${command.name} ${command.usage}`;
+            reply += `\n Proper usage would be: ${prefix} ${command.name} ${command.usage}`;
         }
         return message.channel.send(reply);
     }
