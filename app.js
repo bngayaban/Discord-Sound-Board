@@ -1,9 +1,7 @@
 // Require discord.js package
 const Discord = require("discord.js");
 const Database = require("./dbObjects.js");
-const { Op } = require("sequelize");
 const fs = require('fs');
-const path = './Audio/';
 
 // Create a new client using the new keyword
 const client = new Discord.Client();
@@ -42,12 +40,7 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
-let queue = [];
-let dispatcher = "";
-let nowPlaying = "";
-
-var servers = {};
-
+let servers = {};
 
 // !help command, message event + message object
 client.on("message", message => {
@@ -63,34 +56,18 @@ client.on("message", message => {
     const args = message.content.slice(soundBoardPrefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
     console.log(args);
 
-    command = args.shift();
+    let commandName = args.shift();
     console.log(args);
-    if(!client.commands.has(command)) 
-        return client.commands.get('play').execute(message, command, servers);
+    if(!client.commands.has(commandName)) 
+        return client.commands.get('play').execute(message, commandName, servers);
 
     try {
-        client.commands.get(command).execute(message, args, servers);
+        client.commands.get(commandName).execute(message, args, servers);
     } catch(error) {
         console.error(error);
         message.reply('There was an error trying to execute that command');
     }
 
-    /*
-    if(args.length < 1) {
-        return message.channel.send("One or more arguments missing. Type: !sb --help for more information.");
-    }
-    else if(args[0].startsWith(commandPrefix)) { //run a command
-        const command = args[0].slice(commandPrefix.length);
-
-        if(command === "help")
-            return message.channel.send("Available Commands: --help --update --list --play" );
-
-        return message.channel.send(`Command ${args[0]} not found. Try !sb --help for more options.`)
-    }
-    else {
-        return playSong(message, args[0]);
-    }
-    */
 });
 
 // Log in the bot with the token

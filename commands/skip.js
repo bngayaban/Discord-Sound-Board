@@ -12,7 +12,7 @@ async function skip(message, args, servers) {
 
 module.exports = {
     name: 'skip',
-    description: 'SKip current sound',
+    description: 'Skip current sound',
     execute(message, args, servers) {
         return skip(message, args, servers);
     },

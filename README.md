@@ -23,3 +23,4 @@ TODO:
    - add other folders to scan besides ./Audio
    - permissions for changing tags
    - give users option to add their own files??
+ - lint code

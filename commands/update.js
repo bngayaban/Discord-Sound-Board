@@ -8,7 +8,8 @@ async function updateTag(message, args){
     if(changedRows > 0) {
         return message.channel.send(`Tag ${oldTag} was updated to ${newTag}`);
     }
-        return message.channel.send(`Tag ${oldTag} not found.`);
+    
+    return message.channel.send(`Tag ${oldTag} not found.`);
 }
 
 module.exports = {
