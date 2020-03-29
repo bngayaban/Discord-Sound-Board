@@ -50,8 +50,12 @@ client.on("message", message => {
     const args = message.content.slice(prefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
     console.log(args);
 
-    const commandName = args.shift();
+    let commandName = args.shift();
     console.log(args);
+
+    if(!commandName) {
+        commandName = 'help';
+    }
 
     // If no command try playing it
     if(!client.commands.has(commandName)) {
