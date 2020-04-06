@@ -9,16 +9,23 @@ function ordinalInt(n) {
 } //https://stackoverflow.com/a/39466341
 
 async function play(connection, messageChannel, voiceChannel, server) {
+    const second = 1000; //milliseconds
+    const minute = 60 * second;
+
     server.dispatcher = connection.play(`${audioDirectory}${server.queue[0]}`);
     server.nowPlaying = server.queue[0];
     server.queue.shift();
     
     server.dispatcher.on("finish", end => {
-        if(server.queue[0])
-            play(connection, messageChannel, voiceChannel, server);
-        else {
+        console.log("setting timeout");
+        const timeout = setTimeout(() => {
             server.nowPlaying = "";
             connection.disconnect();
+            },
+            0.1 * minute);
+        if(server.queue[0]) {
+            play(connection, messageChannel, voiceChannel, server);
+            clearTimeout(timeout);
         }
     });
 }
@@ -41,7 +48,7 @@ async function playSong(message, args, servers) {
         if(server.nowPlaying)
             message.channel.send(`Sound ${sfx} added as ${server.queue.length}${ordinalInt(server.queue.length)} in queue.`);
 
-            console.log(message.channel.guild.voice);
+            //console.log(message.channel.guild.voice);
 
         if(!message.channel.guild.voice || !message.channel.guild.voice.connection)// first way around need to check if voice exists, afterwards need to check if it's connected
             message.member.voice.channel.join().then(connection => {
