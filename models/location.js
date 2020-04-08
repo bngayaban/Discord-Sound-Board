@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('audio_location', {
-        file_location: {
+    return sequelize.define('audioDirectory', {
+        filePath: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
