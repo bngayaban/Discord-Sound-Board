@@ -2,27 +2,6 @@ const {Audio, FileLocation} = require("../dbObjects.js");
 const { Op } = require("sequelize");
 const {join} = require('path');
 
-function ordinalInt(n) {
-    return [,'st','nd','rd'][n%100>>3^1&&n%10]||'th';
-} //https://stackoverflow.com/a/39466341
-
-async function play(connection, messageChannel, voiceChannel, server) {
-    const [song, directory] = server.queue[0];
-
-    server.dispatcher = connection.play(join(directory, song));
-    server.nowPlaying = song;
-    server.queue.shift();
-    
-    server.dispatcher.on("finish", end => {
-        if(server.queue[0])
-            play(connection, messageChannel, voiceChannel, server);
-        else {
-            server.nowPlaying = "";
-            connection.disconnect();
-        }
-    });
-}
-
 async function playSong(message, args, servers) {
     let sfx = args;
     const sfxQuery = await Audio.findOne({where:{[Op.or]: [{fileName: sfx}, {tags: sfx}]}, include: FileLocation });
@@ -52,6 +31,27 @@ async function playSong(message, args, servers) {
         return message.channel.send(`Song ${sfx} not found.`);
     }
 }
+
+async function play(connection, messageChannel, voiceChannel, server) {
+    const [song, directory] = server.queue[0];
+
+    server.dispatcher = connection.play(join(directory, song));
+    server.nowPlaying = song;
+    server.queue.shift();
+    
+    server.dispatcher.on("finish", end => {
+        if(server.queue[0])
+            play(connection, messageChannel, voiceChannel, server);
+        else {
+            server.nowPlaying = "";
+            connection.disconnect();
+        }
+    });
+}
+
+function ordinalInt(n) {
+    return [,'st','nd','rd'][n%100>>3^1&&n%10]||'th';
+} //https://stackoverflow.com/a/39466341
 
 module.exports = {
     name: 'play',
