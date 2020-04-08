@@ -2,8 +2,12 @@ module.exports = (sequelize, DataTypes) => {
     return sequelize.define('audio', {
         fileName: {
             type: DataTypes.STRING,
-            unqiue: true,
+            unique: true,
         },
         tags: DataTypes.STRING,
+        location_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        }
     })
 };
