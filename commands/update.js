@@ -1,9 +1,9 @@
-const Database = require("../dbObjects.js");
+const {Audio} = require("../dbObjects.js");
 
 async function updateTag(message, args){
     const oldTag = args[0];
     const newTag = args[1];
-    const changedRows = await Database.update({ tags: newTag}, {where: { tags: oldTag}});
+    const changedRows = await Audio.update({ tags: newTag}, {where: { tags: oldTag}});
 
     if(changedRows > 0) {
         return message.channel.send(`Tag ${oldTag} was updated to ${newTag}`);

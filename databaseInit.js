@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const fs = require('fs');
-const folder = './Audio/';
+const {audioDirectories} = require('./config.js');
+const path = require('path');
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -10,21 +11,62 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 const Audio = sequelize.import('models/audio.js');
-
+const FileLocation = sequelize.import('models/location.js');
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 
-sequelize.sync({force}).then(async () => {
-    const files = fs.readdirSync(folder);
-    const filesNoExt = files.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()}); //https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
-    let promises = [];
+Audio.FileLocation = Audio.belongsTo(FileLocation);
+FileLocation.hasMany(Audio);
 
-    for(let i = 0; i < files.length; i++)
-    {
-        promises.push(Audio.upsert({ fileName: files[i], tags: filesNoExt[i]}));
-        console.log("Added: ", files[i]); 
+sequelize.sync({force}).then(async () => {
+    for(let directory of audioDirectories) {
+        const [dir, _ ] = await FileLocation.findOrCreate({
+            where:{
+                filePath: directory
+            }
+        });
+
+        const filteredFiles = filterFiles(directory);
+        
+        let entries = [];
+        for(let i = 0; i < filteredFiles[0].length; i++) {
+            entries.push({
+                fileName: filteredFiles[0][i],
+                tags: filteredFiles[1][i],
+            });
+        }
+
+        await Audio.bulkCreate(entries, {
+            updateOnDuplicate: ['fileName']
+        });
+
+        let audioEntries = await Audio.findAll({
+            where: {
+                audioDirectoryId: null
+            }
+        });
+
+        let promises = [];
+        for(const entry of audioEntries) {
+            promises.push(entry.setAudioDirectory(dir));
+        }
+        await Promise.all(promises);
+        
     }
 
-    await Promise.all(promises);
     console.log('Database Synced');
     sequelize.close();
 }).catch(console.error);
+
+function filterFiles(directory) {
+    const extensions = ['.ogg', '.mp3', '.wav'];
+
+    const files = fs.readdirSync(directory);
+    
+    let filteredFiles = [];
+    for(const ext of extensions)
+        filteredFiles = filteredFiles.concat(files.filter(file => file.endsWith(ext)));
+
+    const filesNoExt = filteredFiles.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
+
+    return [filteredFiles, filesNoExt];
+}

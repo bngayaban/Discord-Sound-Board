@@ -27,7 +27,7 @@ client.on("ready", () =>{
 });
 
 client.once('ready', () => {
-    Database.sync();
+    //Database.sync();
 });
 
 // When the bot is reconnecting to the websocket

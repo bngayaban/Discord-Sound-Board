@@ -8,5 +8,8 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 const Audio = sequelize.import('models/audio');
+const FileLocation = sequelize.import('models/location.js');
 
-module.exports = Audio;
+Audio.FileLocation = Audio.belongsTo(FileLocation);
+
+module.exports = {Audio, FileLocation};
