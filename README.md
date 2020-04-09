@@ -12,7 +12,7 @@
 1. With a populated Audio Directory, run databaseInit.js
 2. Then run app.js
 
-# TODO:
+## TODO
 
 - update documentation
 - future stuff
@@ -21,3 +21,11 @@
 - give users option to add their own files??
 - lint code
 - batch convert audio to ogg
+
+## DONE
+
+- Added timeout feature
+  - Can be modified in config.js, default 5 minutes
+- Can read from multiple directories
+  - Add as another entry in audioDirectories array in config.js
+  - For Windows systems make sure to escape using \\\\ instead of single \\

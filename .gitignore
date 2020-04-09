@@ -1,4 +1,3 @@
-
 Audio/*
 
 node_modules/
@@ -7,6 +6,6 @@ token.json
 
 bot ID.txt
 
-Database/audio.db
+*.db
 
 *.sqlite

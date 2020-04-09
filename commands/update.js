@@ -1,8 +1,7 @@
 const {Audio} = require("../dbObjects.js");
 
-async function updateTag(message, args){
-    const oldTag = args[0];
-    const newTag = args[1];
+async function updateTag(message, args) {
+    const [oldTag, newTag] = args;
     const changedRows = await Audio.update({ tags: newTag}, {where: { tags: oldTag}});
 
     if(changedRows > 0) {
