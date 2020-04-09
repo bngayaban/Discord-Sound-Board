@@ -8,6 +8,6 @@ const timeoutTime = 5; //in minutes
 module.exports = {
     token,
     prefix,
-    timeoutTime
+    timeoutTime,
     audioDirectories
 };

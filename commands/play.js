@@ -1,37 +1,7 @@
 const {Audio, FileLocation} = require("../dbObjects.js");
 const { Op } = require("sequelize");
-const {audioDirectory, timeoutTime} = require('../config.js');
+const {timeoutTime} = require('../config.js');
 const {join} = require('path');
-
-function ordinalInt(n) {
-    return [,'st','nd','rd'][n%100>>3^1&&n%10]||'th';
-} //https://stackoverflow.com/a/39466341
-
-async function play(connection, messageChannel, voiceChannel, server) {
-    const second = 1000; //milliseconds
-    const minute = 60 * second;
-
-    // Make sure stream doesn't end early
-    if(server.timeout) clearTimeout(server.timeout);
-
-    //Play song, then modify queue
-    server.dispatcher = connection.play(`${audioDirectory}${server.queue[0]}`);
-    server.nowPlaying = server.queue[0];
-    server.queue.shift();
-    
-    server.dispatcher.on("finish", end => {
-        if(server.queue[0]) {
-            play(connection, messageChannel, voiceChannel, server);
-        } else {
-            console.log("setting timeout");
-            server.nowPlaying = "";
-            server.timeout = setTimeout(() => {
-                connection.disconnect();
-                },
-                timeoutTime * minute);
-        }
-    });
-}
 
 async function playSong(message, args, servers) {
     const sfx = args;
@@ -67,6 +37,13 @@ async function playSong(message, args, servers) {
 }
 
 async function play(connection, messageChannel, voiceChannel, server) {
+    const second = 1000; //milliseconds
+    const minute = 60 * second;
+
+    // Make sure stream doesn't end early
+    if(server.timeout) clearTimeout(server.timeout);
+
+    //Play song, then modify queue
     const [song, directory] = server.queue[0];
 
     server.dispatcher = connection.play(join(directory, song));
@@ -74,11 +51,15 @@ async function play(connection, messageChannel, voiceChannel, server) {
     server.queue.shift();
     
     server.dispatcher.on("finish", end => {
-        if(server.queue[0])
+        if(server.queue[0]) {
             play(connection, messageChannel, voiceChannel, server);
-        else {
+        } else {
+            console.log("setting timeout");
             server.nowPlaying = "";
-            connection.disconnect();
+            server.timeout = setTimeout(() => {
+                connection.disconnect();
+                },
+                timeoutTime * minute);
         }
     });
 }
