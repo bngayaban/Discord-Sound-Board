@@ -1,15 +1,31 @@
-# Requirements
+# Installation
 
-Prerequisites:
-     - python2.7 or later with its path environment set
-     - npm : https://www.npmjs.com/
-     - windows build tools(for node-gyp) : https://github.com/nodejs/node-gyp
-     - Chocolatey(for FFMPEG) : https://chocolatey.org/install
-      - FFMPEG : use choco install ffmpeg, to install once chocolately is installed.
-                    Alternatively, you can FFMPEG directly https://www.ffmpeg.org/ but the environment path must be set manually
+## Requirements
 
-Once installed the following npm packages can be installed with : npm discord.js ffmpeg node-opus
+- Copy of Git Repo
+- Your own token, in token.json file
+- Made a discord bot on the developer website
+- Populated Audio Directory or file path properly formatted in the config.js file
 
-- discord.js : all discord interactions
-- ffmpeg : audio streaming
-- node-opus : audio codec
+## Instructions
+
+1. With a populated Audio Directory, run databaseInit.js
+2. Then run app.js
+
+## TODO
+
+- update documentation
+- future stuff
+  - add other folders to scan besides ./Audio
+  - permissions for changing tags
+- give users option to add their own files??
+- lint code
+- batch convert audio to ogg
+
+## DONE
+
+- Added timeout feature
+  - Can be modified in config.js, default 5 minutes
+- Can read from multiple directories
+  - Add as another entry in audioDirectories array in config.js
+  - For Windows systems make sure to escape using \\\\ instead of single \\

@@ -1,21 +1,33 @@
 // Require discord.js package
 const Discord = require("discord.js");
-
-const path = './Audio/';
-
+const Database = require("./dbObjects.js");
 const fs = require('fs');
 
 // Create a new client using the new keyword
 const client = new Discord.Client();
+client.commands = new Discord.Collection();
+
+//setup dynamic commands
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+for(const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
 
 // Accessing the token ./token.json
 const {
-    token
-} = require("./token.json");
+    token,
+    prefix
+} = require("./config.js");
 
 // Display a message once the bot has started
 client.on("ready", () =>{
     console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.once('ready', () => {
+    //Database.sync();
 });
 
 // When the bot is reconnecting to the websocket
@@ -28,50 +40,54 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
-let isReady = true;
+let servers = {};
 
 // !help command, message event + message object
-client.on("message", msg => {
-    const soundBoardPrefix = "!sb"
-    const voiceChannel = msg.member.voiceChannel;
-    const sfx = ["overconfidence.mp3", "triple.mp3", "dio.mp3", "StillAlive.mp3", "Level.ogg"];
-    if(!isReady) return;
+client.on("message", message => {
+    if(!message.content.startsWith(prefix) || message.author.bot) return;
 
-    if(!msg.content.startsWith(soundBoardPrefix) || msg.author.bot) return;
+    console.log(message.content);
+    const args = message.content.slice(prefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
+    console.log(args);
 
-    if(!voiceChannel)
-    {
-        return msg.reply('you need to be in a voice channel to use.');
+    let commandName = args.shift();
+    console.log(args);
+
+    if(!commandName) {
+        commandName = 'help';
     }
 
-    const args = msg.content.slice(soundBoardPrefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
+    // If no command try playing it
+    if(!client.commands.has(commandName)) {
+        if(message.member.voice.channel) {
+            return client.commands.get('play').execute(message, commandName, servers);
+        } else {
+            return message.reply('you need to be in a voice channel to use.');
+        }
+    }
+        
+    const command = client.commands.get(commandName);
 
-    if(args.length != 1)
-    {
-        return msg.channel.send("This command requires one arguement.");
+    if (command.args && command.numArgs != args.length) {
+        let reply = `Command requires ${command.numArgs} arguments.`;
+
+        if (command.usage) {
+            reply += `\n Proper usage would be: ${prefix} ${command.name} ${command.usage}`;
+        }
+        return message.channel.send(reply);
     }
 
-    let index = sfx.findIndex(element => element.includes(args[0])); // https://stackoverflow.com/a/52124191
-    if(index == -1)
-    {
-        return msg.channel.send(`Song ${args[0]} not found.`);
+    if(command.voice && !message.member.voice.channel) {
+        return message.reply('You need to be in a voice channel to use.');
     }
 
-    isReady = false;
-    //attempt to connect to voice channel
-    voiceChannel.join().then(connection =>
-        {
-
-            const dispatcher = connection.playFile(`${path}${sfx[index]}`);
-            dispatcher.on("end", end => {
-                voiceChannel.leave();
-                });
-            }).catch(err => console.log(err));
-    isReady = true;
+    try {
+        command.execute(message, args, servers);
+    } catch(error) {
+        console.error(error);
+        message.reply('There was an error trying to execute that command.');
+    }
 });
-
-
 
 // Log in the bot with the token
 client.login(token);
