@@ -1,10 +1,42 @@
 const {Audio, FileLocation} = require("../dbObjects.js");
 const { Op } = require("sequelize");
+const {audioDirectory, timeoutTime} = require('../config.js');
 const {join} = require('path');
 
+function ordinalInt(n) {
+    return [,'st','nd','rd'][n%100>>3^1&&n%10]||'th';
+} //https://stackoverflow.com/a/39466341
+
+async function play(connection, messageChannel, voiceChannel, server) {
+    const second = 1000; //milliseconds
+    const minute = 60 * second;
+
+    // Make sure stream doesn't end early
+    if(server.timeout) clearTimeout(server.timeout);
+
+    //Play song, then modify queue
+    server.dispatcher = connection.play(`${audioDirectory}${server.queue[0]}`);
+    server.nowPlaying = server.queue[0];
+    server.queue.shift();
+    
+    server.dispatcher.on("finish", end => {
+        if(server.queue[0]) {
+            play(connection, messageChannel, voiceChannel, server);
+        } else {
+            console.log("setting timeout");
+            server.nowPlaying = "";
+            server.timeout = setTimeout(() => {
+                connection.disconnect();
+                },
+                timeoutTime * minute);
+        }
+    });
+}
+
 async function playSong(message, args, servers) {
-    let sfx = args;
+    const sfx = args;
     const sfxQuery = await Audio.findOne({where:{[Op.or]: [{fileName: sfx}, {tags: sfx}]}, include: FileLocation });
+
     if(!servers[message.guild.id]) {
         servers[message.guild.id] = {
             queue: [],
@@ -16,15 +48,17 @@ async function playSong(message, args, servers) {
     if(sfxQuery) {
         server.queue.push([sfxQuery.get('fileName'), sfxQuery.audioDirectory.filePath]);
         console.log(server.queue);
-        if(server.nowPlaying)
-            message.channel.send(`Sound ${sfx} added as ${server.queue.length}${ordinalInt(server.queue.length)} in queue.`);
+        
+        if(server.nowPlaying) {
+            return message.channel.send(`Sound ${sfx} added as ${server.queue.length}${ordinalInt(server.queue.length)} in queue.`);
+        }
 
-            //console.log(message.channel.guild.voice);
-
-        if(!message.channel.guild.voice || !message.channel.guild.voice.connection)// first way around need to check if voice exists, afterwards need to check if it's connected
+        if(message.member.voice.channel) {
             message.member.voice.channel.join().then(connection => {
                 play(connection, message.channel, message.member.voice.channel, server);
             }).catch(err => console.log(err));
+        }
+            
         return;
     }
     else {
