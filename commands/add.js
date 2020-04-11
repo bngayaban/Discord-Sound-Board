@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const {audioDirectories} = require('../config.js');
+const {audioDirectories, FileLocation} = require('../config.js');
 const {Audio} = require('../dbObjects.js');
 
 async function add(message, args) {
@@ -21,7 +21,9 @@ async function add(message, args) {
             message.channel.send(`Error: ${error}`);
         });
 
+    await updateDB(fileName);
 
+    return message.channel.send(`${fileName} added as ${fileName.split('.').slice(0, -1).join('.').toLowerCase()}`);
 }
 
 //https://github.com/milutinke/Discord-Server-Channel-Attachment-Downloader-BOT/blob/master/download.js
@@ -56,8 +58,13 @@ async function download(fileName, url) {
     });
 }
 
-async function updateDB(message) {
-    //await
+async function updateDB(file) {
+    const entry = await Audio.create({
+        fileName: file,
+        tags: file.split('.').slice(0, -1).join('.').toLowerCase()
+    });
+
+    await entry.setAudioDirectory(1);
 }
 
 module.exports = {
