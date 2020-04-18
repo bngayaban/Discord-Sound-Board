@@ -47,10 +47,10 @@ client.on("message", message => {
     if(!message.content.startsWith(prefix) || message.author.bot) return;
 
     console.log(message.content);
-    const args = message.content.slice(prefix.length).split(" ").filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
+    const args = message.content.slice(prefix.length).match(/\S+/g);//.filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
     console.log(args);
 
-    let commandName = args.shift();
+    let commandName = args.shift().toLowerCase();
     console.log(args);
 
     if(!commandName) {

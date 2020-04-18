@@ -27,6 +27,8 @@ Permission.belongsToMany(User, {as: 'Permission', through: 'Rules'});
 sequelize.sync({force}).then(async () => {
     const permissions = [
         Permission.upsert({permission: 'add'}),
+        Permission.upsert({permission: 'play'}),
+        Permission.upsert({permission: 'modify'}),
     ];
 
     await Promise.all(permissions);
