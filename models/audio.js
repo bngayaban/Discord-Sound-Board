@@ -5,6 +5,9 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
         },
         tags: DataTypes.STRING,
+        uid: { 
+            type: DataTypes.STRING
+        },
     }, {
         timestamps:false,
     });

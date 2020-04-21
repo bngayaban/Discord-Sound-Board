@@ -9,6 +9,7 @@ async function add(message, args) {
     const url = attachment.url
     const fileName = url.split('/').pop();
     let nickname = args[0];
+    const uid = message.author.id;
 
     console.log(url);
     
@@ -36,7 +37,7 @@ async function add(message, args) {
         console.log(`Successfully Downloaded: ${url}`);
         
         //update database with new file and nickname
-        await updateDB(fileName, nickname);
+        await updateDB(fileName, nickname, uid);
         return message.channel.send(`${fileName} added as ${nickname}`);
     } catch (error) {
         return message.channel.send(`Error: ${error}`);
@@ -77,11 +78,12 @@ async function download(fileName, url) {
     });
 }
 
-async function updateDB(file, nickname) {
+async function updateDB(file, nickname, uid) {
     try {
         const entry = await Audio.create({
             fileName: file,
-            tags: nickname
+            tags: nickname,
+            uid: uid,
         });
         await entry.setAudioDirectory(1);
     } catch (error) {
@@ -92,7 +94,7 @@ async function updateDB(file, nickname) {
 module.exports = {
     name: 'add',
     description: 'Add a sound file to be played',
-    usage: '<prefix><command name> <file to add> <optional nickname>',
+    usage: '<prefix><command name> <file to add> {nickname}',
     optionalArgs: 1,
     attachments: true,
     execute(message, args) {

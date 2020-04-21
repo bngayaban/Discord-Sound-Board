@@ -32,6 +32,7 @@ sequelize.sync({force}).then(async () => {
             entries.push({
                 fileName: filteredFiles[0][i],
                 tags: filteredFiles[1][i],
+                uid: 'SELF',
             });
         }
 
