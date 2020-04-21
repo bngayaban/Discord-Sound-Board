@@ -1,4 +1,4 @@
-const {User} = require('../dbObjects.js');
+const {User, Permission} = require('../dbObjects.js');
 const checker = require('./helper/checkArgs.js');
 
 async function modifyPermission(message, args) {
@@ -10,27 +10,32 @@ async function modifyPermission(message, args) {
         console.log(`${error}`);
         return message.channel.send(`${error}`);
     }
-    console.log(user)
-    const [newUser, _ ] = await User.findOrCreate({
+    
+    const query = await User.findOne({
         where: {
             uid: user.id,
             gid: message.guild.id,
         }
-    });
-    console.log(permission)
+    })
 
-    try {
-        await newUser.addPermission(permission);
-        return message.channel.send(`${user.user.username} has been granted ${permission.permission} permissions.`)
-    } catch (error) {
-        console.log(`${error}`);
+    const hasP = await query.hasPermission(permission);
+    if(!hasP) {
+        return message.channel.send(`${user.user.username} does not have ${permission.permission} permissions.`)
     }
 
+    await query.removePermission(permission);
+    
+    const pCount = await query.countPermission();
+    if(pCount == 0) {
+        await query.destroy()
+    }
+
+    return message.channel.send(`Revoked ${permission.permission} permissions for ${user.user.username}.`);
 }
 
 module.exports = {
-    name: 'grant',
-    description: `Gives user permissions to use bot. Requires user to already have permission or be an admin. \n
+    name: 'revoke',
+    description: `Revokes user permissions to use bot. Requires user to already have permission or be an admin. \n
                     Available Permissions:
                     modify - change permission 
                     add - add song 
