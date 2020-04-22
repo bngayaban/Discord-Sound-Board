@@ -26,9 +26,9 @@ Permission.belongsToMany(User, {as: 'Permission', through: 'Rules'});
 
 sequelize.sync({force}).then(async () => {
     const permissions = [
-        Permission.upsert({permission: 'add'}),
-        Permission.upsert({permission: 'play'}),
-        Permission.upsert({permission: 'modify'}),
+        Permission.upsert({name: 'add'}),
+        Permission.upsert({name: 'play'}),
+        Permission.upsert({name: 'modify'}),
     ];
 
     await Promise.all(permissions);
@@ -74,7 +74,7 @@ sequelize.sync({force}).then(async () => {
 }).catch(console.error);
 
 function filterFiles(directory) {
-    const extensions = ['.ogg', '.mp3', '.wav'];
+    const extensions = ['.ogg', '.mp3', '.wav', '.oga'];
 
     const files = fs.readdirSync(directory);
     

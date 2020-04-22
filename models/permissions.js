@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define('permissions', {
-        permission: {
+        name: {
             type: DataTypes.STRING,
             unique: true,
         },

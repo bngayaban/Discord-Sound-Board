@@ -4,24 +4,26 @@ const checker = require('./helper/checkArgs.js');
 async function modifyPermission(message, args) {
     let user, permission;
 
+    // check args
     try {
         [user, permission] = await checker.checkArguments(message, args);
     } catch (error) {
         console.log(`${error}`);
         return message.channel.send(`${error}`);
     }
-    console.log(user)
+    
+    // check db for user
     const [newUser, _ ] = await User.findOrCreate({
         where: {
             uid: user.id,
             gid: message.guild.id,
         }
     });
-    console.log(permission)
-
+   
+    // then add user to db with permissions
     try {
         await newUser.addPermission(permission);
-        return message.channel.send(`${user.user.username} has been granted ${permission.permission} permissions.`)
+        return message.channel.send(`${user.user.username} has been granted ${permission.name} permissions.`)
     } catch (error) {
         console.log(`${error}`);
     }

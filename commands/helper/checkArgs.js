@@ -13,7 +13,7 @@ async function checkArguments(message, args) {
             model: Permission,
             as: 'Permission',
             where: {
-                permission: 'modify',
+                name: 'modify',
             }
         }],
     });
@@ -30,7 +30,7 @@ async function checkArguments(message, args) {
         return Promise.reject(Error(`Could not find ${username}.\nPlease check spelling and try again.`));
 
     //check database if permission being modified exists
-    const perm = await Permission.findOne({where:{permission: permission}});
+    const perm = await Permission.findOne({where:{name: permission}});
     if(!perm)
         return Promise.reject(Error(`Could not find ${permission} permission.\nPlease check spelling and try again.`));
 
