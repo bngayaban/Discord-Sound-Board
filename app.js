@@ -1,7 +1,7 @@
 // Require discord.js package
 const Discord = require("discord.js");
-const Database = require("./dbObjects.js");
 const fs = require('fs');
+const assist = require('./helper/permissionCheck');
 
 // Create a new client using the new keyword
 const client = new Discord.Client();
@@ -43,13 +43,16 @@ client.on("disconnect", () =>{
 let servers = {};
 
 // !help command, message event + message object
-client.on("message", message => {
+client.on("message", async message => {
     if(!message.content.startsWith(prefix) || message.author.bot) return;
 
     console.log(message.content);
-    const args = message.content.slice(prefix.length).match(/\S+/g);//.filter(x => x).map((item)=>{return item.toLowerCase()}); //removes the soundboard prefix and seperates by spaces and lowercases
-    console.log(args);
 
+    // removes prefix then splits by white space or quotes, then replaces quotes with nothing
+    // https://stackoverflow.com/a/366229
+    const args = message.content.slice(prefix.length).match(/('.*?'|".*?"|\S+)/g).map(str => str.replace(/(\"|\')/g, ''));
+    console.log(args);
+    
     let commandName = args.shift().toLowerCase();
     console.log(args);
 
@@ -81,12 +84,26 @@ client.on("message", message => {
         return message.reply('You need to be in a voice channel to use.');
     }
 
+    if(command.permission) {
+        let hasPermission;
+        try {
+            hasPermission = await assist.checkPermission(message, command.permission);
+        } catch (error) {
+            return message.reply(`${error}`);
+        }
+
+        if(!hasPermission) {
+            return message.reply('You do not have enough privilege to use.');
+        }
+    }
+
     try {
         command.execute(message, args, servers);
     } catch(error) {
         console.error(error);
         message.reply('There was an error trying to execute that command.');
     }
+
 });
 
 // Log in the bot with the token

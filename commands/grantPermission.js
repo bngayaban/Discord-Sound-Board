@@ -40,6 +40,7 @@ module.exports = {
     args: true,
     numArgs: 2,
     usage: '<username> <permission>',
+    permission: 'modify',
     execute(message, args) {
         return modifyPermission(message, args);
     },
