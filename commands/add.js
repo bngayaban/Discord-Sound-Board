@@ -22,7 +22,7 @@ async function add(message, args) {
     //check if nickname exists in database
     if(nickname) {
         nickname = nickname.toLowerCase();
-        const query = await Audio.findOne({where:{tags: nickname}});
+        const query = await Audio.findOne({where:{nickname: nickname}});
         if(query) {
             message.channel.send(`${nickname} already exists in database. Using default instead.`);
             nickname = fileName.split('.').slice(0, -1).join('.').toLowerCase();
@@ -82,7 +82,7 @@ async function updateDB(file, nickname, uid) {
     try {
         const entry = await Audio.create({
             fileName: file,
-            tags: nickname,
+            nickname: nickname,
             uid: uid,
         });
         await entry.setAudioDirectory(1);

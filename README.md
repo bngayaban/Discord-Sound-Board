@@ -17,7 +17,7 @@
 - update documentation
 - future stuff
   - add other folders to scan besides ./Audio
-  - permissions for changing tags
+  - permissions for changing nickname
 - give users option to add their own files??
 - lint code
 - batch convert audio to ogg
