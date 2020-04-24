@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const {audioDirectories, FileLocation} = require('../config.js');
+const {audioDirectories, maxFileSize} = require('../config.js');
 const {Audio} = require('../dbObjects.js');
 
 async function add(message, args) {
@@ -40,7 +40,7 @@ async function add(message, args) {
         await updateDB(fileName, nickname, uid);
         return message.channel.send(`${fileName} added as ${nickname}`);
     } catch (error) {
-        return message.channel.send(`Error: ${error}`);
+        return message.channel.send(`${error}`);
     }
 }
 
@@ -57,9 +57,9 @@ async function download(fileName, url) {
     console.log(filePath)
     
     const headers = await axios.head(url);
-    if(headers.headers['content-length'] > 6 * megabyte) {
+    if(headers.headers['content-length'] > maxFileSize * megabyte) {
         return new Promise((resolve, reject) => {
-            reject(Error(`File can not exceed ${6 * megabyte} megabytes.`))
+            reject(Error(`File can not exceed ${maxFileSize} megabytes.`))
         })
     }
 
