@@ -17,7 +17,23 @@ const force = process.argv.includes('--force') || process.argv.includes('-f');
 Audio.FileLocation = Audio.belongsTo(FileLocation);
 FileLocation.hasMany(Audio);
 
+const User = sequelize.import('models/user.js');
+const Permission = sequelize.import('models/permissions.js');
+
+User.belongsToMany(Permission, {as: 'Permission', through: 'Rules'});
+Permission.belongsToMany(User, {as: 'Permission', through: 'Rules'});
+
+
 sequelize.sync({force}).then(async () => {
+    const permissions = [
+        Permission.upsert({name: 'add'}),
+        Permission.upsert({name: 'play'}),
+        Permission.upsert({name: 'modify'}),
+    ];
+
+    await Promise.all(permissions);
+
+
     for(let directory of audioDirectories) {
         const [dir, _ ] = await FileLocation.findOrCreate({
             where:{
@@ -59,7 +75,7 @@ sequelize.sync({force}).then(async () => {
 }).catch(console.error);
 
 function filterFiles(directory) {
-    const extensions = ['.ogg', '.mp3', '.wav'];
+    const extensions = ['.ogg', '.mp3', '.wav', '.oga'];
 
     const files = fs.readdirSync(directory);
     
