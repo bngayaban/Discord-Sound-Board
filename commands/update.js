@@ -1,23 +1,23 @@
 const {Audio} = require("../dbObjects.js");
 
-async function updateTag(message, args) {
-    const [oldTag, newTag] = args;
-    const changedRows = await Audio.update({ tags: newTag}, {where: { tags: oldTag}});
+async function updateName(message, args) {
+    const [oldName, newName] = args;
+    const changedRows = await Audio.update({ nickname: newName}, {where: { nickname: oldName}});
 
     if(changedRows > 0) {
-        return message.channel.send(`Tag ${oldTag} was updated to ${newTag}`);
+        return message.channel.send(`Name ${oldName} was renamed to ${newName}`);
     }
     
-    return message.channel.send(`Tag ${oldTag} not found.`);
+    return message.channel.send(`Name ${oldName} not found.`);
 }
 
 module.exports = {
-    name: 'update',
-    description: 'Update tag to a new tag.',
+    name: 'rename',
+    description: 'Rename Name to a new Name.',
     args: true,
     numArgs: 2,
-    usage: '<old tag> <new tag>',
+    usage: '<old Name> <new Name>',
     execute(message, args) {
-        return updateTag(message, args);
+        return updateName(message, args);
     },
 }

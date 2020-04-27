@@ -4,7 +4,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        tags: DataTypes.STRING,
+        nickname: DataTypes.STRING,
+        uid: { 
+            type: DataTypes.STRING
+        },
     }, {
         timestamps:false,
     });

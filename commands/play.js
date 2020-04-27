@@ -5,7 +5,7 @@ const {join} = require('path');
 
 async function playSong(message, args, servers) {
     const sfx = args;
-    const sfxQuery = await Audio.findOne({where:{[Op.or]: [{fileName: sfx}, {tags: sfx}]}, include: FileLocation });
+    const sfxQuery = await Audio.findOne({where:{[Op.or]: [{fileName: sfx}, {nickname: sfx}]}, include: FileLocation });
 
     if(!servers[message.guild.id]) {
         servers[message.guild.id] = {
