@@ -1,8 +1,11 @@
 const {Audio} = require("../dbObjects.js");
 
 async function listSongs(message, args) {
-    const songs = await Audio.findAll({attributes: ['tags']});
-    const songList = songs.map(s => s.tags).join(', ') || "No songs.";
+    const songs = await Audio.findAll({
+        attributes: ['nickname'], 
+        order:[['nickname','ASC']]
+    });
+    const songList = songs.map(s => s.nickname).join(', ') || "No songs.";
     console.log(songList);
     return message.channel.send(`List of songs: ${songList}`, {split:{char:', '}});
 }
