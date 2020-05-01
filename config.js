@@ -1,4 +1,4 @@
-const {token} = require('./token.json');
+const token = 'your_token_here';
 const prefix = '!sb';
 const audioDirectories = ['./Audio/',
                         ];
