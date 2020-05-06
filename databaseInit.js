@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const fs = require('fs');
+const {promises: fs} = require('fs');
 const {audioDirectories} = require('./config.js');
 const path = require('path');
 
@@ -25,65 +25,99 @@ Permission.belongsToMany(User, {as: 'Permission', through: 'Rules'});
 
 
 sequelize.sync({force}).then(async () => {
-    const permissions = [
-        Permission.upsert({name: 'add'}),
-        Permission.upsert({name: 'play'}),
-        Permission.upsert({name: 'modify'}),
-    ];
 
-    await Promise.all(permissions);
+    let promises = await addPermissionsToDatabase();
 
+    await Promise.all(promises);
 
     for(let directory of audioDirectories) {
-        const [dir, _ ] = await FileLocation.findOrCreate({
-            where:{
-                filePath: directory
-            }
-        });
+        const [dir, _ ] = await addDirectoryToDatabase(directory);
 
-        const filteredFiles = filterFiles(directory);
-        
-        let entries = [];
-        for(let i = 0; i < filteredFiles[0].length; i++) {
-            entries.push({
-                fileName: filteredFiles[0][i],
-                nickname: filteredFiles[1][i],
-                uid: 'SELF',
-            });
-        }
+        const {audioFiles, audioFilesNoExt} = await gatherAudioFiles(directory);
 
-        await Audio.bulkCreate(entries, {
-            updateOnDuplicate: ['fileName']
-        });
+        await addAudioFilesToDatabase(audioFiles, audioFilesNoExt);
 
-        let audioEntries = await Audio.findAll({
-            where: {
-                audioDirectoryId: null
-            }
-        });
-
-        let promises = [];
-        for(const entry of audioEntries) {
-            promises.push(entry.setAudioDirectory(dir));
-        }
-        await Promise.all(promises);
-        
+        const associates = await associateFilesToDirectory(dir);
+        await Promise.all(associates);
     }
 
     console.log('Database Synced');
     sequelize.close();
 }).catch(console.error);
 
-function filterFiles(directory) {
+
+async function addPermissionsToDatabase() {
+    const permissionsToAdd = ['add', 'play', 'modify'];
+
+    let promises = [];
+
+    for(let p of permissionsToAdd) {
+        promises.push(Permission.upsert({name: p}));
+    }
+    return promises;
+}
+
+async function addDirectoryToDatabase(directory) {
+    return FileLocation.findOrCreate({
+        where:{
+            filePath: directory
+        }
+    });
+}
+
+async function gatherAudioFiles(directory) {
     const extensions = ['.ogg', '.mp3', '.wav', '.oga'];
 
-    const files = fs.readdirSync(directory);
+    // https://stackoverflow.com/a/58332163
+    let files;
+    try {
+        files = await fs.readdir(directory);
+    }
+    catch (e) {
+        console.log(e);
+    }
     
-    let filteredFiles = [];
+    if(files === undefined) {
+        console.log(`No files found in ${directory}`);
+        return {audioFiles: [], audioFilesNoExt: []};
+    }
+
+    let audioFiles = [];
     for(const ext of extensions)
-        filteredFiles = filteredFiles.concat(files.filter(file => file.endsWith(ext)));
+        audioFiles = audioFiles.concat(files.filter(file => file.endsWith(ext)));
 
-    const filesNoExt = filteredFiles.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
+    const audioFilesNoExt = audioFiles.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
 
-    return [filteredFiles, filesNoExt];
+    return {audioFiles, audioFilesNoExt};
+}
+
+async function addAudioFilesToDatabase(files, filesNoExt) {
+    let entries = [];
+    
+    for(let i = 0; i < files.length; i++) {
+        entries.push({
+            fileName: files[i],
+            nickname: filesNoExt[i],
+            uid: 'SELF',
+        });
+        console.log(`Adding: ${files[i]} as ${filesNoExt[i]}`)
+    }
+
+    return Audio.bulkCreate(entries, {
+        ignoreDuplicates: true
+    });
+}
+
+async function associateFilesToDirectory(dir) {
+    let audioEntries = await Audio.findAll({
+        where: {
+            audioDirectoryId: null
+        }
+    });
+
+    let promises = [];
+    for(const entry of audioEntries) {
+        promises.push(entry.setAudioDirectory(dir));
+    }
+    return promises;
 }
