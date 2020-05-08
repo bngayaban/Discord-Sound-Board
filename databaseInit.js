@@ -1,7 +1,6 @@
 const Sequelize = require('sequelize');
 const {promises: fs} = require('fs');
 const {audioDirectories} = require('./config.js');
-const path = require('path');
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -31,10 +30,16 @@ sequelize.sync({force}).then(async () => {
     await Promise.all(promises);
 
     for(let directory of audioDirectories) {
-        const [dir, _ ] = await addDirectoryToDatabase(directory);
+        const [dir, created ] = await addDirectoryToDatabase(directory);
 
-        const {audioFiles, audioFilesNoExt} = await gatherAudioFiles(directory);
+        let audioFiles = await gatherAudioFiles(directory);
 
+        if(!created) {
+            const dirAudio = await dir.getAudios();
+            audioFiles = await removeDuplicateFiles(dirAudio, audioFiles);
+        }
+        
+        const audioFilesNoExt = removeExtension(audioFiles);
         await addAudioFilesToDatabase(audioFiles, audioFilesNoExt);
 
         const associates = await associateFilesToDirectory(dir);
@@ -86,9 +91,59 @@ async function gatherAudioFiles(directory) {
     for(const ext of extensions)
         audioFiles = audioFiles.concat(files.filter(file => file.endsWith(ext)));
 
-    const audioFilesNoExt = audioFiles.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
+    
 
-    return {audioFiles, audioFilesNoExt};
+    return audioFiles;
+}
+
+// if the directory already exists in the database, need to check if the files in the directory match the database
+// if file exists in database but not in directory, delete record
+// if file does not exist in database but in directory, add to list of files to add
+async function removeDuplicateFiles(databaseAudio, directoryAudio) {
+
+    databaseAudio.sort((a, b) => {  
+                    if (a.fileName > b.fileName) {
+                            return 1;
+                        } else if (a.fileName < b.fileName) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }   
+                    });
+                    
+    directoryAudio.sort();
+
+    let filesToAdd = [];
+    let i = 0, j = 0;
+    while( i < directoryAudio.length && j < databaseAudio.length) {
+        if(directoryAudio[i] > databaseAudio[j].fileName) {
+            console.log(`Removing ${databaseAudio[j].fileName} from database.`);
+            await databaseAudio[j].destroy();
+            j++;
+        } else if (directoryAudio[i] < databaseAudio[j].fileName) {
+            filesToAdd.push(directoryAudio[i]);
+            i++;
+        } else {
+            i++;
+            j++;
+        }
+    }
+
+    while ( j < databaseAudio.length) {
+        console.log(`Removing ${databaseAudio[j].fileName} from database.`);
+        await databaseAudio[j].destroy();
+        j++;
+    }
+    while ( i < directoryAudio.length) {
+        filesToAdd.push(directoryAudio[i]);
+        i++;
+    }
+        
+    return filesToAdd;
+}
+
+function removeExtension(directoryAudio) {
+    return directoryAudio.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
 }
 
 async function addAudioFilesToDatabase(files, filesNoExt) {
@@ -114,6 +169,10 @@ async function associateFilesToDirectory(dir) {
             audioDirectoryId: null
         }
     });
+
+    if(audioEntries.length === 0 ) {
+        console.log(`No new files from ${dir.filePath} to add.`)
+    }
 
     let promises = [];
     for(const entry of audioEntries) {
