@@ -11,10 +11,15 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 
 const Audio = sequelize.import('models/audio.js');
 const FileLocation = sequelize.import('models/location.js');
+const Tag = sequelize.import('models/tag.js');
+
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 
 Audio.FileLocation = Audio.belongsTo(FileLocation);
 FileLocation.hasMany(Audio);
+
+Audio.belongsToMany(Tag, {through: 'AudioTag'});
+Tag.belongsToMany(Audio, {through: 'AudioTag'});
 
 const User = sequelize.import('models/user.js');
 const Permission = sequelize.import('models/permissions.js');
