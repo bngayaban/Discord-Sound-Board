@@ -1,11 +1,12 @@
-const {Audio, Tag} = require('../dbObjects.js');
+const {Tag} = require('../dbObjects.js');
+const {checkTagArgs} = require('./helper/checkTag.js');
 
 async function addTag(message, args) {
     const [nickname, tag] = args;
     
     let dbAudio;
     try {
-        dbAudio = await checkArgs(nickname, tag);
+        dbAudio = await checkTagArgs(nickname, tag);
     } catch (e) {
         console.log(`${e}`);
         return message.channel.send(`${e}`);
@@ -22,24 +23,7 @@ async function addTag(message, args) {
     return message.channel.send(`Added tag ${tag} to ${nickname}`);
 }
 
-async function checkArgs(nickname, tag){
-    if(!/^\w+$/.test(tag)) {
-        return Promise.reject(Error(`Invalid tag. Tag can only contain alpha numeric characters and underscores.`));
-    }
 
-    const dbAudio = await Audio.findOne({
-        where: {
-            nickname: nickname,
-        }
-    });
-
-    console.log(dbAudio)
-    if(!dbAudio) {
-        return Promise.reject(Error(`Name ${nickname} doesn't exist.`));
-    }
-
-    return Promise.resolve(dbAudio);
-}
 
 module.exports = {
     name: 'addtag',
