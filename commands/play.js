@@ -87,4 +87,5 @@ module.exports = {
     execute(message, args, servers) {
         return playSong(message, args, servers);
     },
+    playSong: playSong
 }
