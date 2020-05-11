@@ -5,13 +5,20 @@ async function addTag(message, args) {
     console.log(nickname, tag);
 
     let dbAudio;
+    let tagNickname;
+
     try {
         dbAudio = await Audio.getAudioByNickname(nickname);
+        tagNickname = await Audio.getAudioByNickname(tag);
     } catch(e) {
         console.log(`${e}`);
         return message.channel.send(`${e}`);
     }
     
+    if(tagNickname) {
+        return message.channel.send(`Tag ${tag} can't be used as it is already being used as a nickname for ${tagNickname.fileName}.`)
+    }
+
     const [dbTag, created ] = await Tag.findOrCreate({
         where: {
             tagName: tag,
