@@ -2,7 +2,7 @@ const {Audio, Tag} = require('../dbObjects.js');
 const {playSong} = require('./play.js');
 
 async function playTag(message, args, servers) {
-    const tag = args;
+    const tag = args.shift().toLowerCase();
 
     const dbTag = await Tag.findOne({
         where: {
@@ -15,7 +15,6 @@ async function playTag(message, args, servers) {
     }
 
     const songs = await dbTag.getAudios();
-    console.log(songs.length);
 
     const songNum = getRandomInt(songs.length);
 

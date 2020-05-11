@@ -14,11 +14,10 @@ module.exports = (sequelize, DataTypes) => {
 
     Audio.getAudioByNickname = async (name) => {
         let dbAudio;
-
         try {
-            dbAudio = await Audio.findOne({
+            dbAudio = await Audio.findAll({
                 where: {
-                    nickname: name,
+                    nickname: name
                 }
             });
         } catch (e) {
