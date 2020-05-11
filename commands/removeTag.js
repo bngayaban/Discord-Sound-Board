@@ -1,13 +1,12 @@
 const {Audio, Tag} = require('../dbObjects.js');
-const {checkTagArgs} = require('./helper/checkTag.js');
 
 async function removeTag(message, args) {
     const [nickname, tag] = args;
     
     let dbAudio;
     try {
-        dbAudio = await checkTagArgs(nickname, tag);
-    } catch (e) {
+        dbAudio = await Audio.getAudioByNickname(nickname);
+    } catch(e) {
         console.log(`${e}`);
         return message.channel.send(`${e}`);
     }
@@ -40,7 +39,7 @@ async function removeTag(message, args) {
 module.exports = {
     name: 'removetag',
     description: 'Remove tag from sound file.',
-    usage: '<prefix><command name> <file nickname> <tag>',
+    usage: '<file nickname> <tag>',
     numArgs: 2,
     args: true,
     execute(message, args) {

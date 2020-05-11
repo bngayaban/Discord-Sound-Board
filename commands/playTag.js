@@ -30,7 +30,7 @@ function getRandomInt(max) {
 module.exports = {
     name: 'playtag',
     description: 'Play a random sound based on tag',
-    usage: '<prefix><command name> <tag>',
+    usage: '<tag>',
     numArgs: 1,
     args: true,
     execute(message, args, servers) {

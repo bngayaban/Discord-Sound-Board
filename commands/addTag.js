@@ -1,13 +1,13 @@
-const {Tag} = require('../dbObjects.js');
-const {checkTagArgs} = require('./helper/checkTag.js');
+const {Audio, Tag} = require('../dbObjects.js');
 
 async function addTag(message, args) {
-    const [nickname, tag] = args;
-    
+    const [nickname, tag] = args.map(a => a.toLowerCase());
+    console.log(nickname, tag);
+
     let dbAudio;
     try {
-        dbAudio = await checkTagArgs(nickname, tag);
-    } catch (e) {
+        dbAudio = await Audio.getAudioByNickname(nickname);
+    } catch(e) {
         console.log(`${e}`);
         return message.channel.send(`${e}`);
     }
@@ -25,10 +25,11 @@ async function addTag(message, args) {
 
 
 
+
 module.exports = {
     name: 'addtag',
     description: 'Add tag to sound file.',
-    usage: '<prefix><command name> <file nickname> <tag>',
+    usage: '<file nickname> <tag>',
     numArgs: 2,
     args: true,
     execute(message, args) {
