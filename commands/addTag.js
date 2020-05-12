@@ -26,13 +26,21 @@ async function addTag(message, args) {
         return message.channel.send(`Tag ${tag} can't be used as it is already being used as a nickname for ${tagNickname[0].fileName}.`)
     }
 
-    const [dbTag, created ] = await Tag.findOrCreate({
-        where: {
-            tagName: tag,
-        }
-    });
+    try {
+        const [dbTag, created ] = await Tag.findOrCreate({
+            where: {
+                tagName: tag,
+            }
+        });
 
-    await dbTag.addAudio(dbAudio);
+        await dbTag.addAudio(dbAudio);
+    } catch (e) {
+        if(e.name === 'SequelizeValidationError') {
+            console.log(e);
+            return message.channel.send(`Error: Tag ${tag} can only contain letters, numbers or underscores.`);
+        }
+        return console.log(e);
+    }
 
     return message.channel.send(`Added tag ${tag} to ${foundNames}`);
 }
