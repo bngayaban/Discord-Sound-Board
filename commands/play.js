@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const {timeoutTime} = require('../config.js');
 const {join} = require('path');
 const fs = require('fs');
+const Server = require('../Classes/server.js');
 
 async function playSong(message, args, servers) {
     const sfx = args;
@@ -10,9 +11,7 @@ async function playSong(message, args, servers) {
 
     //creates server for containing song queue and nowPlaying
     if(!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue: [],
-        };
+        servers[message.guild.id] = new Server(message.guild.id);
     } 
 
     const server = servers[message.guild.id];
