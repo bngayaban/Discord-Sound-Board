@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const tagRegex = /^\w+$/i;
+    const tagRegex = /^[a-z0-9_]+$/; //strings contain a combination of lowercase letters, numbers or underscores
 
     const Tag = sequelize.define('tag', {
         tagName: {
