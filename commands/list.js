@@ -2,6 +2,9 @@ const {Audio} = require("../dbObjects.js");
 
 async function listSongs(message, args) {
     const songs = await Audio.findAll({
+        where: {
+            hidden: false,
+        },
         attributes: ['nickname'], 
         order:[['nickname','ASC']]
     });
