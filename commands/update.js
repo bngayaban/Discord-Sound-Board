@@ -30,8 +30,7 @@ async function nicknameExists(name) {
 module.exports = {
     name: 'rename',
     description: 'Rename Name to a new Name.',
-    args: true,
-    numArgs: 2,
+    requiredArgs: 2,
     usage: '<old Name> <new Name>',
     execute(message, args) {
         return updateName(message, args);

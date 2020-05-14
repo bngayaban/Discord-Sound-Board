@@ -16,6 +16,10 @@ async function playTag(message, args, servers) {
 
     const songs = await dbTag.getAudios();
 
+    if(songs.length === 0) {
+        return message.channel.send(`No songs associated with ${tag}`);
+    }
+
     const songNum = getRandomInt(songs.length);
 
     return playSong(message, songs[songNum].nickname, servers);
@@ -30,8 +34,7 @@ module.exports = {
     name: 'playtag',
     description: 'Play a random sound based on tag',
     usage: '<tag>',
-    numArgs: 1,
-    args: true,
+    requiredArgs: 1,
     execute(message, args, servers) {
         return playTag(message, args, servers);
     },

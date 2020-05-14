@@ -57,9 +57,9 @@ function filterNames(dbAudio, nicknames) {
 module.exports = {
     name: 'addtag',
     description: 'Add tag to sound file.',
-    usage: '<tag> <sound nickname>',
-    numArgs: 2,
-    args: true,
+    usage: '<tag> <sound nickname> [0 or more additional nicknames]',
+    requiredArgs: 2,
+    optionalArgs: true,
     execute(message, args) {
         return addTag(message, args);
     },

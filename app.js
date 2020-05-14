@@ -71,11 +71,17 @@ client.on("message", async message => {
         
     const command = client.commands.get(commandName);
 
-    if (command.args && command.numArgs != args.length) {
-        let reply = `Command requires ${command.numArgs} arguments.`;
+    if (!(command.requiredArgs && command.requiredArgs == args.length) && !(command.requiredArgs > args.length && command.optionalArgs === true)) {
+        let reply = `Command requires `;
+
+        if(command.optionalArgs) {
+            reply += 'at least ';
+        }
+
+        reply += `${command.requiredArgs} arguments.`
 
         if (command.usage) {
-            reply += `\n Proper usage would be: ${prefix} ${command.name} ${command.usage}`;
+            reply += `\nProper usage would be: ${prefix} ${command.name} ${command.usage}`;
         }
         return message.channel.send(reply);
     }

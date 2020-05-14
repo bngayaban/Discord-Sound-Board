@@ -80,8 +80,7 @@ function ordinalInt(n) {
 module.exports = {
     name: 'play',
     description: 'Play a sound',
-    args: true,
-    numArgs: 1,
+    requiredArgs: 1,
     usage: '<sound name>',
     voice: true,
     execute(message, args, servers) {

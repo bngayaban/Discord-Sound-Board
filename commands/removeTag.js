@@ -55,9 +55,9 @@ function filterNames(dbAudio, nicknames) {
 module.exports = {
     name: 'removetag',
     description: 'Remove tag from sound file.',
-    usage: '<tag> <nickname>',
-    numArgs: 2,
-    args: true,
+    usage: '<tag> <nickname> [0 or more nicknames]',
+    requiredArgs: 2,
+    optionalArgs: true,
     execute(message, args) {
         return removeTag(message, args);
     },

@@ -13,6 +13,7 @@ async function listSongs(message, args) {
 module.exports = {
     name: 'list',
     description: 'Lists available sounds.',
+    usage: '',
     execute(message, args) {
         return listSongs(message, args);
     },
