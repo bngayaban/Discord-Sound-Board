@@ -61,7 +61,7 @@ client.on("message", async message => {
     // If no command try playing it
     if(!client.commands.has(commandName)) {
         if(message.member.voice.channel) {
-            return client.commands.get('play').execute(message, commandName, servers);
+            return client.commands.get('play').execute(message, commandName);
         } else {
             return message.reply('you need to be in a voice channel to use.');
         }
@@ -69,7 +69,9 @@ client.on("message", async message => {
         
     const command = client.commands.get(commandName);
 
-    if (!(command.requiredArgs && command.requiredArgs == args.length) && !(command.requiredArgs > args.length && command.optionalArgs === true)) {
+    if (('requiredArgs' in command) &&
+        !(command.requiredArgs == args.length) && 
+        !(command.requiredArgs < args.length && command.optionalArgs === true)) {
         let reply = `Command requires `;
 
         if(command.optionalArgs) {

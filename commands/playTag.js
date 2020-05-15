@@ -1,7 +1,7 @@
 const {Audio, Tag} = require('../dbObjects.js');
 const {playSong} = require('./play.js');
 
-async function playTag(message, args, servers) {
+async function playTag(message, args) {
     const tag = args.shift().toLowerCase();
 
     const dbTag = await Tag.findOne({
@@ -22,7 +22,7 @@ async function playTag(message, args, servers) {
 
     const songNum = getRandomInt(songs.length);
 
-    return playSong(message, songs[songNum].nickname, servers);
+    return playSong(message, songs[songNum].nickname);
 
 }
 
@@ -35,7 +35,7 @@ module.exports = {
     description: 'Play a random sound based on tag',
     usage: '<tag>',
     requiredArgs: 1,
-    execute(message, args, servers) {
-        return playTag(message, args, servers);
+    execute(message, args) {
+        return playTag(message, args);
     },
 };
