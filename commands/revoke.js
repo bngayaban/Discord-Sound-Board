@@ -50,8 +50,7 @@ module.exports = {
                     modify - change permission 
                     add - add song 
                     play - play song`,
-    args: true,
-    numArgs: 2,
+    requiredArgs: 1,    
     usage: '<username> <permission>',
     permission: 'modify',
     execute(message, args) {
