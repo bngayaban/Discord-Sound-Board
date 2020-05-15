@@ -1,5 +1,5 @@
 const axios = require('axios');
-const fs = require('fs');
+const {promises: fs} = require('fs');
 const path = require('path');
 const {audioDirectories, maxFileSize} = require('../config.js');
 const {Audio} = require('../dbObjects.js');
@@ -15,10 +15,13 @@ async function add(message, args) {
     
     // check if attachment exists
     if(!url) return message.channel.send("No attachment found.");
+    
     //check if file exists
-    if(fs.existsSync(`${audioDirectories[0]}/${fileName}`)) {
+
+    if(await fileExist(path.join(audioDirectories[0], fileName))) {
         return message.channel.send(`${fileName} already exists please rename and try again.`);
     }
+
     //check if nickname exists in database
     if(nickname) {
         nickname = nickname.toLowerCase();
@@ -42,6 +45,17 @@ async function add(message, args) {
     } catch (error) {
         return message.channel.send(`${error}`);
     }
+}
+
+async function fileExist(file) {
+    let fileExist = true;
+
+    try {
+        await fs.access(file);
+    } catch(e) {
+        fileExist = false;
+    }
+    return fileExist;
 }
 
 //https://github.com/milutinke/Discord-Server-Channel-Attachment-Downloader-BOT/blob/master/download.js
