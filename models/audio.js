@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         uid: { 
             type: DataTypes.STRING
         },
+        hidden: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        }
     }, {
         timestamps:false,
     });
