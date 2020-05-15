@@ -3,19 +3,13 @@ const { Op } = require("sequelize");
 const {timeoutTime} = require('../config.js');
 const {join} = require('path');
 const fs = require('fs');
+const Server = require('../Classes/server.js');
 
-async function playSong(message, args, servers) {
+async function playSong(message, args) {
     const sfx = args;
     const sfxQuery = await Audio.findOne({where:{[Op.or]: [{fileName: sfx}, {nickname: sfx}]}, include: FileLocation });
 
-    //creates server for containing song queue and nowPlaying
-    if(!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue: [],
-        };
-    } 
-
-    const server = servers[message.guild.id];
+    const server = Server.getServer(message.guild.id);
 
     if(!sfxQuery)
         return message.channel.send(`Song ${sfx} not found.`);
@@ -83,8 +77,8 @@ module.exports = {
     requiredArgs: 1,
     usage: '<sound name>',
     voice: true,
-    execute(message, args, servers) {
-        return playSong(message, args, servers);
+    execute(message, args) {
+        return playSong(message, args);
     },
     playSong: playSong
 }

@@ -40,8 +40,6 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
-let servers = {};
-
 // !help command, message event + message object
 client.on("message", async message => {
     if(!message.content.startsWith(prefix) || message.author.bot) return;
@@ -104,7 +102,7 @@ client.on("message", async message => {
     }
 
     try {
-        command.execute(message, args, servers);
+        command.execute(message, args);
     } catch(error) {
         console.error(error);
         message.reply('There was an error trying to execute that command.');
