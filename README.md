@@ -18,13 +18,13 @@ While nodeJS is installing, we will setup the Developer Account. Navigate to the
 
 Now that the account is setup, we need to figure out the permissions for the bot. Navigate to the [Permission Calculator Website](https://finitereality.github.io/permissions-calculator/?v=0) and select "View Channels", "Send Messages", "Connect", "Speak", "View Channel", and "Use Voice Activity". Copy the "Client ID" from earlier into the Client ID box. Then click "ADD". This will prompt you with the list of servers you can add the bot to. Select all that apply and click "Continue".
 
-NOTE 1: If you want other people to add the bot, save the URL at the top of your browser and send it them.
+NOTE 1: If you want other people to add the bot, save the URL at the top of your browser and send it to them.
 
 NOTE 2: If a voice channel has custom permissions, the bot will needed to be granted permissions to join that channel.
 
 ### Downloading and Installing Sound Board Bot
 
-Once permissions are setup, we begin installing the bot. Navigate to the top of this repository and click "Clone or Download" and select ["Download ZIP"](https://github.com/bngayaban/Discord-Sound-Board/archive/master.zip). Once downloaded, unzip the files in the directory you want to install it in. Then open the directory in a terminal/powershell and type: `npm install` to begin installing the necessary packages.
+Once permissions are setup, we will begin installing the bot. Navigate to the top of this repository and click "Clone or Download" and select [Download ZIP](https://github.com/bngayaban/Discord-Sound-Board/archive/master.zip). Once downloaded, unzip the files in the directory you want to install it in. Then open the directory in a terminal/powershell and type: `npm install` to begin installing the necessary packages.
 
 ### Setting Up Sound Board Bot
 
