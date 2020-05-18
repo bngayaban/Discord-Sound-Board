@@ -2,21 +2,33 @@
 
 ## About
 
-This is a Discord Bot that plays sound effects locally from your computer to the server channel. The sound effects must be obtained by the user, none are provided by default. This can also play music, provided their file path is given.
-
-
+This is a Discord Bot that plays sound effects locally from your computer to a voice channel. The sound effects must be obtained by the user, none are provided by default. This can also play music, provided their file path is given.
 
 ## Installation
 
-First, download node.js from their [website](https://nodejs.org/en/download/). Install it and then we will create the bot.
+### Downloading and Installing Node.js
 
-Navigate to the [Discord Developer website](https://discordapp.com/developers/applications). Sign in with your discord username and password. In the upper right corner, click on "New Application", name it(I used "Sound Board") and then click "create". In the new menu, click the "Copy" button under "CLIENT ID" and save it to a text file. Then, on the left side of the new menu, click on "Bot", then click "Add Bot" and select "Yes". In the new menu, under token, click "Copy" and save the token in the same text file as the client id. 
+First, navigate to the [nodeJS website](https://nodejs.org/en/download/) and then download and install the appropriate version of nodeJS for your system.
 
-Now we need to setup permissions. Navigate to the [Permissions Calculator Website](https://finitereality.github.io/permissions-calculator/?v=0) and check off "View Channels", "Send Messages", "Connect", "Speak", and "Use Voice Activity". Copy the "Client ID" from earlier into the Client ID box. Then click "ADD". This will prompt you with the list of servers you can add it to, select all of them you want to add to. If you want other people to add the bot, you can copy the URL at the top and give it to them to add.
+### Setting Up A Developer Account
 
-To install the bot, navigate to the top of this repository and click "Clone or download" and select ["Download ZIP"]((https://github.com/bngayaban/Discord-Sound-Board/archive/master.zip)). Unzip it in the directory you want to install it in. Open the directory in a terminal/powershell. Type: `npm install`. To begin installing the necessary packages. Once that has finished, we can setup the bot.
+While nodeJS is installing, we will setup the Developer Account. Navigate to the [Discord Developer Website](https://discord.com/developers) and sign in with your Discord username and password. In the upper right corner, click on "New Application", name it and then click on "Create". In the new menu, click "Copy" under "Client ID" and save it to a text file. On the left side, click on "Bot", then "Add Bot", and then "Yes". In the new screen, click "Copy" under token and save it to the same text file.
 
-Open the config.js file in your preferred text editor. In the token section, copy and paste the token from earlier in between the quotes. It should like this:
+### Calculating Permissions
+
+Now that the account is setup, we need to figure out the permissions for the bot. Navigate to the [Permission Calculator Website](https://finitereality.github.io/permissions-calculator/?v=0) and select "View Channels", "Send Messages", "Connect", "Speak", "View Channel", and "Use Voice Activity". Copy the "Client ID" from earlier into the Client ID box. Then click "ADD". This will prompt you with the list of servers you can add the bot to. Select all that apply and click "Continue".
+
+NOTE 1: If you want other people to add the bot, save the URL at the top of your browser and send it them.
+
+NOTE 2: If a voice channel has custom permissions, the bot will needed to be granted permissions to join that channel.
+
+### Downloading and Installing Sound Board Bot
+
+Once permissions are setup, we begin installing the bot. Navigate to the top of this repository and click "Clone or Download" and select ["Download ZIP"](https://github.com/bngayaban/Discord-Sound-Board/archive/master.zip). Once downloaded, unzip the files in the directory you want to install it in. Then open the directory in a terminal/powershell and type: `npm install` to begin installing the necessary packages.
+
+### Setting Up Sound Board Bot
+
+After npm has finished installing the packages, we can configure the bot. In the directory where the bot is installed, open the `config.js` file in your preferred text editor. In the token section, copy and paste the token from earlier in between the quotes. It should look like this:
 
 `token: 'your_token_here',`
 
@@ -30,7 +42,7 @@ Unformatted: `C:\Your\Path\To\Your\Audio`
 
 Formatted: `C:\\Your\\Path\\To\\Your\\Audio`
 
-Then in the config.js file, paste it in a new line under "audioDirectories" in single quotes. 
+Then in the config.js file, paste it in a new line under "audioDirectories" in single quotes.
 
 Example:
 
@@ -53,13 +65,18 @@ const audioDirectories = ['./Audio/',
                             'D:\\More\\Audio'
                         ];
 ```
+
 If you want to use the default directory, paste the audio into the "audio" directory where the bot was unzipped.
 
-Once the directories are setup, you can initialize the bot's database. Open a powershell/terminal window in the directory the bot was installed. Then run `node databaseInit.js`.
+Once the directories are setup, you can initialize the bot's database. Open a powershell/terminal window in the directory the bot was installed and then run `node databaseInit.js`.
 
-Once the database is setup, we can start the bot by typing `node app.js`.
+### Running Sound Board Bot
+
+Once the bot has been configured, we can start the bot by typing `node app.js` in the same terminal.
 
 If no problems were encountered, you should see the bot online in Discord.
+
+For continuous usage, usage consider buying a cheap computer such as a raspberry pi and hosting the bot there.
 
 ## Usage
 
@@ -67,7 +84,7 @@ Once the bot is running, you can command the bot using the prefix "!sb" followed
 
 When the bot is first initialized, each song gets their own nickname, which is their file name without the extension. Ex. `song1.mp3` nickname is `song1`.
 
-If you are trying to add something with a space in it, put it in quotes to treat it as one thing. Ex. `song with space.mp3` should be `"song with space.mp3"`. 
+If you are trying to add something with a space in it, put it in quotes to treat it as one thing. Ex. `song with space.mp3` should be `"song with space.mp3"`.
 
 The following is a list of the commands organized by function.
 
@@ -122,6 +139,22 @@ Key:
 
 - Resumes the current song.
 
+### Tagging
+
+Tagging allows you to tag multiple songs with a tag, so that when you the play the tag, it will randomly pick a song with that tag. Tags are case insensitive.
+
+`<addtag> <tag name> <song nickname> [0 or more additional song nicknames]`
+
+- Tags multiple songs with the same tag.
+
+`<removetag> <tag name> <song nickname> [0 or more additional song nicknames]`
+
+- Removes tag from the given songs.
+
+`<playtag> <tag name>`
+
+- Play a random song tagged with the tag name.
+
 ### Permissions
 
 The currently available permissions to be added are `add` and `modify` for giving people permission to add songs and modify other user's permissions. By default server admins and owners have `modify` and `add` permissions.
@@ -133,7 +166,6 @@ The currently available permissions to be added are `add` and `modify` for givin
 `<revoke> <Discord Name> <permission name>`
 
 - Revokes another user's permissions.
-
 
 ## Customization
 
@@ -156,12 +188,11 @@ All of this can be changed in the config.js file.
 ## TODO
 
 - update documentation
-- future stuff
-  - permissions for changing nickname
+- permissions for changing nickname and tags
 
 - lint code
-- batch convert audio to ogg
-- add tag system and method for playing random song based on tag
+- batch convert audio to ogg, will probably use ffmpeg-normalize
+
 
 ## DONE
 
@@ -172,9 +203,8 @@ All of this can be changed in the config.js file.
   - For Windows systems make sure to escape using \\\\ instead of single \\
 - give users option to add their own files??
 - add other folders to scan besides ./Audio
+- add tag system and method for playing random song based on tag
 
 ## Suggestions and modifications
 
-Any suggestions are welcome and people are welcome to do with this code as they please, some credit would be nice if possible.
-
-
+Any suggestions are welcomed and you are free to do with code under the MIT license.

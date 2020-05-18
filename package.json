@@ -15,7 +15,7 @@
     "url": "git://github.com/bngayaban/Discord-Sound-Board.git"
   },
   "author": "Bryan Gayaban",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
     "axios": "^0.19.2",
