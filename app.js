@@ -40,8 +40,6 @@ client.on("disconnect", () =>{
     console.log(`This bot is now disconnected: ${client.user.tag}`);
 });
 
-let servers = {};
-
 // !help command, message event + message object
 client.on("message", async message => {
     if(!message.content.startsWith(prefix) || message.author.bot) return;
@@ -63,7 +61,7 @@ client.on("message", async message => {
     // If no command try playing it
     if(!client.commands.has(commandName)) {
         if(message.member.voice.channel) {
-            return client.commands.get('play').execute(message, commandName, servers);
+            return client.commands.get('play').execute(message, commandName);
         } else {
             return message.reply('you need to be in a voice channel to use.');
         }
@@ -71,11 +69,19 @@ client.on("message", async message => {
         
     const command = client.commands.get(commandName);
 
-    if (command.args && command.numArgs != args.length) {
-        let reply = `Command requires ${command.numArgs} arguments.`;
+    if (('requiredArgs' in command) &&
+        !(command.requiredArgs == args.length) && 
+        !(command.requiredArgs < args.length && command.optionalArgs === true)) {
+        let reply = `Command requires `;
+
+        if(command.optionalArgs) {
+            reply += 'at least ';
+        }
+
+        reply += `${command.requiredArgs} arguments.`
 
         if (command.usage) {
-            reply += `\n Proper usage would be: ${prefix} ${command.name} ${command.usage}`;
+            reply += `\nProper usage would be: ${prefix} ${command.name} ${command.usage}`;
         }
         return message.channel.send(reply);
     }
@@ -98,7 +104,7 @@ client.on("message", async message => {
     }
 
     try {
-        command.execute(message, args, servers);
+        command.execute(message, args);
     } catch(error) {
         console.error(error);
         message.reply('There was an error trying to execute that command.');

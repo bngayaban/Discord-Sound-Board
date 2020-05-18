@@ -9,3 +9,5 @@ bot ID.txt
 *.db
 
 *.sqlite
+
+*.code-workspace

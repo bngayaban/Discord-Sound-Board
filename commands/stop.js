@@ -1,8 +1,7 @@
-async function stop(message, args, servers) {
-    if(!servers[message.guild.id])
-        return message.reply("Try playing a song first.");
+const Server = require('../Classes/server.js');
 
-    const server = servers[message.guild.id];
+async function stop(message, args) {
+    const server = Server.getServer(message.guild.id);
 
     if(server.dispatcher) {
         server.queue = [];
@@ -15,7 +14,7 @@ module.exports = {
     name: 'clear',
     description: 'Clears the current song and the queue.',
     voice: true,
-    execute(message, args, servers) {
-        return stop(message, args, servers);
+    execute(message, args) {
+        return stop(message, args);
     },
 }
