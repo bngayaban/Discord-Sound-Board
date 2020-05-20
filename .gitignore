@@ -6,8 +6,14 @@ token.json
 
 bot ID.txt
 
-*.db
+*.code-workspace
 
+# Database
+*.db
 *.sqlite
 
-*.code-workspace
+# Audio files
+*.ogg
+*.mp3
+*.wav
+*.oga
