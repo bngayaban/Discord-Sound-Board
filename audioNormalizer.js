@@ -1,3 +1,6 @@
+// References
+// http://k.ylo.ph/2016/04/04/loudnorm.html
+
 const path = require('path');
 const {promises: fs} = require('fs');
 const normalize = require('ffmpeg-normalize');
@@ -6,40 +9,55 @@ const normalize = require('ffmpeg-normalize');
  *  AudioArray[1]: their location
  *
  */
-async function normalizeAudio(audioArray, outputDirectory) {
+async function normalizeAudio(directories, loudness, options={}) {
+    const {
+        outputDirectory,
+        extension,
+        bitrate,
+        append = '',
+        verbose = false
+    } = options;
 
-    if(! await checkDir(outputDirectory)) {
+    if(outputDirectory && ! await checkDir(outputDirectory)) {
         throw new Error('Output directory is invalid');
-    }
-  
-    //let promises = [];
-    for(const audio of audioArray) {
-        const index = audio[0].lastIndexOf('.');
-        const normalizedName = audio[0].slice(0, index) + '_norm' + '.ogg'//audio[0].slice(index);
-
-        const mInput = path.join(__dirname, audio[1], audio[0]);
-        const mOutput = path.join(outputDirectory, normalizedName)
-        console.log(mInput, mOutput);
-        await normalize({
-            input: mInput,
-            output: mOutput,
-            loudness: {
-                normalization: 'ebuR128',
-                target: {
-                    input_i: -23,
-                    input_lra: 7.0,
-                    input_tp: -2.0
-                }
-            },
-            verbose: false
-        });
+    } else if (outputDirectory) {
+        console.log(`Output folder detected, using ${outputDirectory} for all audio.`);
     }
 
-    
-    //await Promise.all(promises);
+    let promises = [];
+    for(const dir in directories) {
+        const outputDir = outputDirectory || dir + '_normalized';
+        if(!await checkDir(outputDir)){
+            console.log(`No output folder detected, creating folder for ${dir} named ${outputDir}.`)
+            await fs.mkdir(outputDir);
+        } else {
+            console.log(`Using ${outputDir} for audio from ${dir}.\n`);
+        }
+
+        for(const audio of directories[dir]) {
+            const index = audio.lastIndexOf('.');
+            const ext = extension || audio.slice(index);
+            const normalizedName = audio.slice(0, index) + append + ext;
+
+            const input = path.join(dir, audio);
+            const output = path.join(outputDir, normalizedName);
+
+            console.log(input, output);
+            promises.push( normalize({
+                input: input,
+                output: output,
+                loudness: loudness,
+                verbose: verbose
+            }));
+        }
+    }
+    const results = await Promise.allSettled(promises);
     console.log('Done');
+
+    return results;
 }
 
+// returns true if path to dir exists and is a directory
 async function checkDir(outputDirectory) {
     let pathExists = true;
     let isDir = false;
@@ -55,17 +73,42 @@ async function checkDir(outputDirectory) {
     return pathExists && isDir;
 }
 
-const audioNames = ['dio22.mp3', 'execution.ogg', 'giorno.ogg'];
-const directories = ['./Audio', './Audio', './Audio'];
+const audioNames = ['execution.ogg', 'giorno.ogg','dio23.mp3'];
+const directories = ['./Audio'];
 
-const input = audioNames.map((item, index) => [item, directories[index]])//[audioNames, directories];
-const output = path.join(__dirname, './nAudio');
-
+let input = {}; //= directories.map((item, index) => [item, audioNames])//[directory, audioName];
+for(const dir of directories) {
+    input[dir] = audioNames;
+}
 console.log(input);
 
+const output = path.join(__dirname, './nAudio');
+
+
+function parseArgs(audioFiles, options={}) {
+    const {
+        output,
+        extension,
+        bitrate,
+        append
+    } = options;
+
+}
+
+
 (async (input, output) => {
+    loudness = {
+        normalization: 'ebuR128',
+        target: {
+            input_i: -23,
+            input_lra: 7.0,
+            input_tp: -2.0
+        }
+    }
+
     try {
-        await normalizeAudio(input, output);
+        const results = await normalizeAudio(input, loudness, {outputDirectory: output});
+        console.log(results);
     } catch(e) {
         console.log(e)
     }
@@ -76,28 +119,3 @@ console.log(input);
 module.exports = {
     normalizeAudio
 }
-
-
-/*
-// http://k.ylo.ph/2016/04/04/loudnorm.html
-normalize({
-    input: './Audio/astronomia.ogg',
-    output: './Audio/astronomia_norm.ogg',
-    loudness: {
-        normalization: 'ebuR128',
-        target: {
-            input_i: -23,
-            input_lra: 7.0,
-            input_tp: -2.0
-        }
-    },
-    verbose: false
-})
-.then(normalized  => {
-    console.log(normalized)
-})
-.catch(error => {
-    console.log(error)
-    // Some error happened
-});
-*/
