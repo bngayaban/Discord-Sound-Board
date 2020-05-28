@@ -1,7 +1,8 @@
 const axios = require('axios');
 const {promises: fs} = require('fs');
 const path = require('path');
-const {audioDirectories, maxFileSize} = require('../config.js');
+const {audioDirectories, maxFileSize, normalize} = require('../config.js');
+const {normalizeAudio} = require('../audioNormalizer.js');
 const {Audio} = require('../dbObjects.js');
 
 async function add(message, args) {
@@ -39,6 +40,13 @@ async function add(message, args) {
         await download(fileName, url);
         console.log(`Successfully Downloaded: ${url}`);
         
+        if(normalize) {
+            const out = await normalizeAudio({
+                [audioDirectories[0]]: fileName
+            });
+            console.log(out);
+        }
+
         //update database with new file and nickname
         await updateDB(fileName, nickname, uid);
         return message.channel.send(`${fileName} added as ${nickname}`);
@@ -64,8 +72,8 @@ async function download(fileName, url) {
     const dirPath = path.resolve(audioDir, audioDirectories[0]);
     const megabyte = 1000000;
     console.log(dirPath)
-    if(!fs.existsSync(dirPath))
-        fs.mkdirSync(dirPath);
+    if(!await fs.exists(dirPath))
+        await fs.mkdir(dirPath);
 
     const filePath = path.join(dirPath, `${fileName}`);
     console.log(filePath)
