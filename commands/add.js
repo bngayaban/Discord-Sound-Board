@@ -1,5 +1,5 @@
 const axios = require('axios');
-const {promises: fs} = require('fs');
+const {promises: fs, createWriteStream} = require('fs');
 const path = require('path');
 const {audioDirectories, maxFileSize} = require('../config.js');
 const {Audio} = require('../dbObjects.js');
@@ -64,8 +64,8 @@ async function download(fileName, url) {
     const dirPath = path.resolve(audioDir, audioDirectories[0]);
     const megabyte = 1000000;
     console.log(dirPath)
-    if(!fs.existsSync(dirPath))
-        fs.mkdirSync(dirPath);
+    if(!await fileExist(dirPath))
+        await fs.mkdir(dirPath);
 
     const filePath = path.join(dirPath, `${fileName}`);
     console.log(filePath)
@@ -77,7 +77,7 @@ async function download(fileName, url) {
         })
     }
 
-    const writer = fs.createWriteStream(filePath);
+    const writer = createWriteStream(filePath);
     const response = await axios({
         url,
         method: 'GET',
