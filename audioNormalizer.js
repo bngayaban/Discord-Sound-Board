@@ -26,7 +26,7 @@ async function normalizeAudio(directories, loudness, options={}) {
 
     let promises = [];
     for(const dir in directories) {
-        const outputDir = outputDirectory || dir + '_normalized';
+        const outputDir = outputDirectory || normalizeAudio.getNormalizedDirectory(dir);
         if(!await checkDir(outputDir)){
             console.log(`No output folder detected, creating folder for ${dir} named ${outputDir}.`)
             await fs.mkdir(outputDir);
@@ -68,33 +68,26 @@ async function checkDir(outputDirectory) {
         pathExists = false;
     }
 
-    console.log(pathExists, isDir)
+    //console.log(pathExists, isDir)
 
     return pathExists && isDir;
 }
 
+
+normalizeAudio.getNormalizedDirectory = (directory) => {
+    return directory + '_normalized';
+}
+
+/* //test code
 const audioNames = ['execution.ogg', 'giorno.ogg','dio23.mp3'];
 const directories = ['./Audio'];
 
-let input = {}; //= directories.map((item, index) => [item, audioNames])//[directory, audioName];
+let input = {}; 
 for(const dir of directories) {
     input[dir] = audioNames;
 }
-console.log(input);
 
 const output = path.join(__dirname, './nAudio');
-
-
-function parseArgs(audioFiles, options={}) {
-    const {
-        output,
-        extension,
-        bitrate,
-        append
-    } = options;
-
-}
-
 
 (async (input, output) => {
     loudness = {
@@ -114,7 +107,7 @@ function parseArgs(audioFiles, options={}) {
     }
     
 })(input, output);
-
+*/
 
 module.exports = {
     normalizeAudio

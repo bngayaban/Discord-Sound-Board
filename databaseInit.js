@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const {promises: fs} = require('fs');
-const {audioDirectories} = require('./config.js');
+const {audioDirectories, normalize} = require('./config.js');
+const {normalizeAudio} = require('./audioNormalizer.js');
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -35,6 +36,10 @@ sequelize.sync({force}).then(async () => {
     await Promise.all(promises);
 
     for(let directory of audioDirectories) {
+
+        if(normalize){
+            directory = normalizeAudio.getNormalizedDirectory(directory);
+        }
         const [dir, created ] = await addDirectoryToDatabase(directory);
 
         let audioFiles = await gatherAudioFiles(directory);
@@ -89,7 +94,7 @@ async function gatherAudioFiles(directory) {
     
     if(files === undefined) {
         console.log(`No files found in ${directory}`);
-        return {audioFiles: [], audioFilesNoExt: []};
+        return [];
     }
 
     let audioFiles = [];
