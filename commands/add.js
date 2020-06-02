@@ -40,15 +40,10 @@ async function add(message, args) {
         await download(fileName, url);
         console.log(`Successfully Downloaded: ${url}`);
         
-        if(normalize) {
-            const out = await normalizeAudio({
-                [audioDirectories[0]]: fileName
-            });
-            console.log(out);
-        }
+        await normalizeFile(fileName);
 
         //update database with new file and nickname
-        await updateDB(fileName, nickname, uid);
+        await updateDB (fileName, nickname, uid);
         return message.channel.send(`${fileName} added as ${nickname}`);
     } catch (error) {
         return message.channel.send(`${error}`);
@@ -98,6 +93,24 @@ async function download(fileName, url) {
         writer.on('finish', resolve);
         writer.on('error', reject);
     });
+}
+
+async function normalizeFile(filename) {
+    const audioDir = path.dirname(__dirname);
+    const dirPath = path.resolve(audioDir, audioDirectories[0]);
+
+    const output = await normalizeAudio({
+            [dirPath]: [filename]
+        }, {
+        }, {
+            extension: '.ogg',
+            append: '_norm'
+        }
+    );
+
+    const outputDir = output[0].value.info.output;
+
+    return outputDir;
 }
 
 async function updateDB(file, nickname, uid) {

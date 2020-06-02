@@ -18,9 +18,11 @@ async function normalizeAudio(directories, loudness, options={}) {
         verbose = false
     } = options;
 
-    if(!loudness || loudness == 'default') {
+    if(Object.keys(loudness).length === 0) {
         loudness = normalizeAudio.defaultLoudness();
     }
+
+    console.log(loudness)
 
     if(outputDirectory && ! await checkDir(outputDirectory)) {
         throw new Error('Output directory is invalid');
@@ -77,7 +79,7 @@ async function checkDir(outputDirectory) {
     return pathExists && isDir;
 }
 
-normalize.defaultLoudness = () => {
+normalizeAudio.defaultLoudness = () => {
     return {   
         normalization: 'ebuR128',
         target: {
