@@ -153,6 +153,10 @@ async function removeDuplicateFiles(databaseAudio, directoryAudio) {
 }
 
 function removeExtension(directoryAudio) {
+    if(normalize) {
+        const lengthToSlice = '_norm.ogg'.length;
+        return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice).toLowerCase()});
+    }
     return directoryAudio.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
 }
 
