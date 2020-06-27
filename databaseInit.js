@@ -35,9 +35,9 @@ sequelize.sync({force}).then(async () => {
 
     await Promise.all(promises);
 
-    for(let directory of audioDirectories) {
+    for(let [index, directory] of audioDirectories.entries()) {
 
-        if(normalize){
+        if(normalize && index === 0) {
             directory = normalizeAudio.getNormalizedDirectory(directory);
         }
         const [dir, created ] = await addDirectoryToDatabase(directory);

@@ -90,41 +90,14 @@ normalizeAudio.defaultLoudness = () => {
     }
 }
 
-
+// returns the location of where the normalized version of an audio directory SHOULD be
+// which is located as a sub directory of the given directory
+// Returns: audioDirectoryName/audioDirectory_normalized
 normalizeAudio.getNormalizedDirectory = (directory) => {
-    return directory + '_normalized';
+    const baseDir = path.basename(directory) + '_normalized';
+
+    return path.join(directory, baseDir);
 }
-
-/* //test code
-const audioNames = ['execution.ogg', 'giorno.ogg','dio23.mp3'];
-const directories = ['./Audio'];
-
-let input = {}; 
-for(const dir of directories) {
-    input[dir] = audioNames;
-}
-
-const output = path.join(__dirname, './nAudio');
-
-(async (input, output) => {
-    loudness = {
-        normalization: 'ebuR128',
-        target: {
-            input_i: -23,
-            input_lra: 7.0,
-            input_tp: -2.0
-        }
-    }
-
-    try {
-        const results = await normalizeAudio(input, loudness, {outputDirectory: output});
-        console.log(results);
-    } catch(e) {
-        console.log(e)
-    }
-    
-})(input, output);
-*/
 
 module.exports = {
     normalizeAudio
