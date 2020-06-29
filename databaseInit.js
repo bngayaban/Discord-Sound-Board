@@ -37,6 +37,11 @@ sequelize.sync({force}).then(async () => {
 
     for(let [index, directory] of audioDirectories.entries()) {
 
+        if(! await checkDir(directory)) {
+            console.log(`Could not access: ${directory} \nCheck spelling and run again.`)
+            continue;
+        }
+        
         if(normalize && index === 0) {
             directory = normalizeAudio.getNormalizedDirectory(directory);
         }
@@ -60,7 +65,18 @@ sequelize.sync({force}).then(async () => {
     sequelize.close();
 }).catch(console.error);
 
+async function checkDir(directory) {
+    let pathExists = true;
+    let isDir = false;
+    try {
+        await fs.access(directory);
+        isDir = (await fs.stat(directory)).isDirectory();
+    } catch (e) {
+        pathExists = false;
+    }
 
+    return pathExists && isDir;
+}
 async function addPermissionsToDatabase() {
     const permissionsToAdd = ['add', 'play', 'modify'];
 
