@@ -49,7 +49,7 @@ sequelize.sync({force}).then(async () => {
             audioFiles = await removeDuplicateFiles(dirAudio, audioFiles);
         }
         
-        const audioFilesNoExt = removeExtension(audioFiles);
+        const audioFilesNoExt = removeExtension(audioFiles, index);
         await addAudioFilesToDatabase(audioFiles, audioFilesNoExt);
 
         const associates = await associateFilesToDirectory(dir);
@@ -152,8 +152,8 @@ async function removeDuplicateFiles(databaseAudio, directoryAudio) {
     return filesToAdd;
 }
 
-function removeExtension(directoryAudio) {
-    if(normalize) {
+function removeExtension(directoryAudio, index) {
+    if(normalize && index === 0) {
         const lengthToSlice = '_norm.ogg'.length;
         return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice).toLowerCase()});
     }
