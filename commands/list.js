@@ -10,7 +10,9 @@ async function listSongs(message, args) {
     });
     const songList = songs.map(s => s.nickname).join(', ') || "No songs.";
     console.log(songList);
-    return message.channel.send(`List of songs: ${songList}`, {split:{char:', '}});
+
+    //formatted as code to prevent markdown formatting due to special chars in song names
+    return message.channel.send(`List of songs: ${songList}`, {split:{char:', '}, code: true});
 }
 
 module.exports = {

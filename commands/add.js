@@ -1,14 +1,16 @@
 const axios = require('axios');
 const {promises: fs, createWriteStream} = require('fs');
 const path = require('path');
-const {audioDirectories, maxFileSize} = require('../config.js');
-const {Audio} = require('../dbObjects.js');
+const {audioDirectories, maxFileSize, normalize} = require('../config.js');
+const {normalizeAudio} = require('../audioNormalizer.js');
+const {Audio, FileLocation} = require('../dbObjects.js');
 
 async function add(message, args) {
     const attachment = message.attachments.first(); //assume only 1 attachment
     const url = attachment.url
-    const fileName = url.split('/').pop();
+    let fileName = url.split('/').pop();
     let nickname = args[0];
+    let outputDir = audioDirectories[0];
     const uid = message.author.id;
 
     console.log(url);
@@ -17,7 +19,6 @@ async function add(message, args) {
     if(!url) return message.channel.send("No attachment found.");
     
     //check if file exists
-
     if(await fileExist(path.join(audioDirectories[0], fileName))) {
         return message.channel.send(`${fileName} already exists please rename and try again.`);
     }
@@ -39,8 +40,15 @@ async function add(message, args) {
         await download(fileName, url);
         console.log(`Successfully Downloaded: ${url}`);
         
+
+        if(normalize){
+            ({outputFile: fileName} = await normalizeFile(fileName));
+            console.log(`Successfully Normalized: ${fileName}`);
+        }
+        
+
         //update database with new file and nickname
-        await updateDB(fileName, nickname, uid);
+        await updateDB (fileName, nickname, uid, outputDir);
         return message.channel.send(`${fileName} added as ${nickname}`);
     } catch (error) {
         return message.channel.send(`${error}`);
@@ -92,14 +100,40 @@ async function download(fileName, url) {
     });
 }
 
-async function updateDB(file, nickname, uid) {
+async function normalizeFile(filename) {
+    const audioDir = path.dirname(__dirname);
+    const dirPath = path.resolve(audioDir, audioDirectories[0]);
+
+    const output = await normalizeAudio({
+            [dirPath]: [filename]
+        }, {
+        }, {
+            extension: '.ogg',
+            append: '_norm'
+        }
+    );
+
+    const outputDir = output[0].value.info.output;
+    const outputFile = path.basename(outputDir);
+    return {outputDir: outputDir, outputFile: outputFile};
+}
+
+async function updateDB(file, nickname, uid, outputDir) {
+    if(normalize) {
+        outputDir = normalizeAudio.getNormalizedDirectory(outputDir);
+    }
+
     try {
+        const directoryQuery = await FileLocation.findOne({
+            where:{filePath: outputDir}
+        });
+        console.log(outputDir);
         const entry = await Audio.create({
             fileName: file,
             nickname: nickname,
             uid: uid,
         });
-        await entry.setAudioDirectory(1);
+        await entry.setAudioDirectory(directoryQuery);
     } catch (error) {
         return Promise.reject(new Error(`Failed to add: ${file}\n${error}`));
     }   

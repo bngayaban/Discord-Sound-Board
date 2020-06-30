@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const {promises: fs} = require('fs');
-const {audioDirectories} = require('./config.js');
+const {audioDirectories, normalize} = require('./config.js');
+const {normalizeAudio} = require('./audioNormalizer.js');
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -34,7 +35,16 @@ sequelize.sync({force}).then(async () => {
 
     await Promise.all(promises);
 
-    for(let directory of audioDirectories) {
+    for(let [index, directory] of audioDirectories.entries()) {
+
+        if(! await checkDir(directory)) {
+            console.log(`Could not access: ${directory} \nCheck spelling and run again.`)
+            continue;
+        }
+        
+        if(normalize && index === 0) {
+            directory = normalizeAudio.getNormalizedDirectory(directory);
+        }
         const [dir, created ] = await addDirectoryToDatabase(directory);
 
         let audioFiles = await gatherAudioFiles(directory);
@@ -44,7 +54,7 @@ sequelize.sync({force}).then(async () => {
             audioFiles = await removeDuplicateFiles(dirAudio, audioFiles);
         }
         
-        const audioFilesNoExt = removeExtension(audioFiles);
+        const audioFilesNoExt = removeExtension(audioFiles, index);
         await addAudioFilesToDatabase(audioFiles, audioFilesNoExt);
 
         const associates = await associateFilesToDirectory(dir);
@@ -55,7 +65,18 @@ sequelize.sync({force}).then(async () => {
     sequelize.close();
 }).catch(console.error);
 
+async function checkDir(directory) {
+    let pathExists = true;
+    let isDir = false;
+    try {
+        await fs.access(directory);
+        isDir = (await fs.stat(directory)).isDirectory();
+    } catch (e) {
+        pathExists = false;
+    }
 
+    return pathExists && isDir;
+}
 async function addPermissionsToDatabase() {
     const permissionsToAdd = ['add', 'play', 'modify'];
 
@@ -89,7 +110,7 @@ async function gatherAudioFiles(directory) {
     
     if(files === undefined) {
         console.log(`No files found in ${directory}`);
-        return {audioFiles: [], audioFilesNoExt: []};
+        return [];
     }
 
     let audioFiles = [];
@@ -147,7 +168,11 @@ async function removeDuplicateFiles(databaseAudio, directoryAudio) {
     return filesToAdd;
 }
 
-function removeExtension(directoryAudio) {
+function removeExtension(directoryAudio, index) {
+    if(normalize && index === 0) {
+        const lengthToSlice = '_norm.ogg'.length;
+        return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice).toLowerCase()});
+    }
     return directoryAudio.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
 }
 
