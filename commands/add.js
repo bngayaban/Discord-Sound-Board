@@ -2,7 +2,7 @@ const axios = require('axios');
 const {promises: fs, createWriteStream} = require('fs');
 const path = require('path');
 const {audioDirectories, maxFileSize, normalize} = require('../config.js');
-const {normalizeAudio} = require('../audioNormalizer.js');
+const {normalizeAudio} = require('../Classes/audioNormalizer.js');
 const {Audio, FileLocation} = require('../dbObjects.js');
 
 async function add(message, args) {
