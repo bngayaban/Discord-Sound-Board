@@ -66,9 +66,27 @@ const audioDirectories = ['./Audio/',
                         ];
 ```
 
-If you want to use the default directory, paste the audio into the "audio" directory where the bot was unzipped.
+If you want to use the default directory, paste the audio into the "Audio" directory where the bot was unzipped.
 
-Once the directories are setup, you can initialize the bot's database. Open a powershell/terminal window in the directory the bot was installed and then run `node databaseInit.js`.
+### Normalizing Audio and Initializing Database
+
+Once the directories are setup, you can initialize the bot's database and normalize files. Open a powershell/terminal window in the directory the bot was installed and then run `node setup.js`. This will run a script to normalize audio in the "Audio" directory and will then add all the files to the bot's database. Once the script finishes, the bot will be ready to run.
+
+#### Adding Additional Audio After Setup
+
+If after setup, you wish to add additional audio by:
+
+ - Adding a folder
+    - See example in Setting Up Sound Board Bot
+ - Adding a file to the "Audio" directory
+    - Copy the file to the directory
+
+ Then simply run the `setups.js` file again for the bot to recognize it.
+
+#### Removing Audio
+
+If you wish to remove Audio from the bot. Either delete the folder from `config.js` file or delete the audio from the "Audio" directory. Then rerun `setup.js`.
+
 
 ### Running Sound Board Bot
 
