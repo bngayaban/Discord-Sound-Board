@@ -3,6 +3,7 @@ const {promises: fs} = require('fs');
 const {audioDirectories, normalize} = require('../config.js');
 const {normalizeAudio} = require('../Classes/audioNormalizer.js');
 const {resolve: pathResolve} = require('path');
+const DirectoryUtility = require('../Classes/directoryUtility');
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -57,7 +58,7 @@ async function syncDatabase() {
 
     for(let [index, directory] of audioDirectories.entries()) {
 
-        if(! await checkDir(directory)) {
+        if(! await DirectoryUtility.isDirectory(directory)) {
             console.log(`Could not access: ${directory} \nCheck spelling and run again.`)
             continue;
         }
@@ -74,7 +75,8 @@ async function syncDatabase() {
             audioFiles = await removeDuplicateFiles(dirAudio, audioFiles);
         }
         
-        const audioFilesNoExt = removeExtension(audioFiles, index);
+        //removes the extension
+        const audioFilesNoExt = DirectoryUtility.removeExtension(audioFiles, (index === 0 && normalize));
         await addAudioFilesToDatabase(audioFiles, audioFilesNoExt);
 
         const associates = await associateFilesToDirectory(dir);
@@ -94,18 +96,6 @@ function locateDatabase(){
     }
 }
 
-async function checkDir(directory) {
-    let pathExists = true;
-    let isDir = false;
-    try {
-        await fs.access(directory);
-        isDir = (await fs.stat(directory)).isDirectory();
-    } catch (e) {
-        pathExists = false;
-    }
-
-    return pathExists && isDir;
-}
 async function addPermissionsToDatabase() {
     const permissionsToAdd = ['add', 'play', 'modify'];
 
@@ -155,54 +145,17 @@ async function gatherAudioFiles(directory) {
 // if file exists in database but not in directory, delete record
 // if file does not exist in database but in directory, add to list of files to add
 async function removeDuplicateFiles(databaseAudio, directoryAudio) {
+    
+    const databaseAudioFileNames = databaseAudio.map(entry => entry.fileName);
+    
+    const {uniqueToA: filesToAdd, uniqueToB: filesToRemove} = DirectoryUtility.findUniqueFiles(directoryAudio, databaseAudioFileNames);
 
-    databaseAudio.sort((a, b) => {  
-                    if (a.fileName > b.fileName) {
-                            return 1;
-                        } else if (a.fileName < b.fileName) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }   
-                    });
-                    
-    directoryAudio.sort();
-
-    let filesToAdd = [];
-    let i = 0, j = 0;
-    while( i < directoryAudio.length && j < databaseAudio.length) {
-        if(directoryAudio[i] > databaseAudio[j].fileName) {
-            console.log(`Removing ${databaseAudio[j].fileName} from database.`);
-            await databaseAudio[j].destroy();
-            j++;
-        } else if (directoryAudio[i] < databaseAudio[j].fileName) {
-            filesToAdd.push(directoryAudio[i]);
-            i++;
-        } else {
-            i++;
-            j++;
-        }
+    for(const file of filesToRemove) {
+        console.log(`Removing: ${file} from database.`)
+        await (databaseAudio.find(entry => entry.fileName === file)).destroy();
     }
 
-    while ( j < databaseAudio.length) {
-        console.log(`Removing ${databaseAudio[j].fileName} from database.`);
-        await databaseAudio[j].destroy();
-        j++;
-    }
-    while ( i < directoryAudio.length) {
-        filesToAdd.push(directoryAudio[i]);
-        i++;
-    }
-        
     return filesToAdd;
-}
-
-function removeExtension(directoryAudio, index) {
-    if(normalize && index === 0) {
-        const lengthToSlice = '_norm.ogg'.length;
-        return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice).toLowerCase()});
-    }
-    return directoryAudio.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
 }
 
 async function addAudioFilesToDatabase(files, filesNoExt) {

@@ -4,7 +4,7 @@
 const path = require('path');
 const {promises: fs} = require('fs');
 const normalize = require('ffmpeg-normalize');
-
+const DirectoryUtility = require('./directoryUtility');
 /** AudioArray[0]: list of audios
  *  AudioArray[1]: their location
  *
@@ -22,9 +22,7 @@ async function normalizeAudio(directories, loudness, options={}) {
         loudness = normalizeAudio.defaultLoudness();
     }
 
-    console.log(loudness)
-
-    if(outputDirectory && ! await checkDir(outputDirectory)) {
+    if(outputDirectory && ! await DirectoryUtility.isDirectory(outputDirectory)) {
         throw new Error('Output directory is invalid');
     } else if (outputDirectory) {
         console.log(`Output folder detected, using ${outputDirectory} for all audio.`);
@@ -33,7 +31,7 @@ async function normalizeAudio(directories, loudness, options={}) {
     let promises = [];
     for(const dir in directories) {
         const outputDir = outputDirectory || normalizeAudio.getNormalizedDirectory(dir);
-        if(!await checkDir(outputDir)){
+        if(!await DirectoryUtility.isDirectory(outputDir)){
             console.log(`No output folder detected, creating folder for ${dir} named ${outputDir}.`)
             await fs.mkdir(outputDir);
         } else {
@@ -61,22 +59,6 @@ async function normalizeAudio(directories, loudness, options={}) {
     console.log('Done');
 
     return results;
-}
-
-// returns true if path to dir exists and is a directory
-async function checkDir(outputDirectory) {
-    let pathExists = true;
-    let isDir = false;
-    try {
-        await fs.access(outputDirectory);
-        isDir = (await fs.stat(outputDirectory)).isDirectory();
-    } catch (e) {
-        pathExists = false;
-    }
-
-    //console.log(pathExists, isDir)
-
-    return pathExists && isDir;
 }
 
 normalizeAudio.defaultLoudness = () => {
