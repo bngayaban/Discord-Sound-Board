@@ -76,7 +76,7 @@ async function syncDatabase() {
         }
         
         //removes the extension
-        const audioFilesNoExt = DirectoryUtility.removeExtension(audioFiles, (index === 0 && normalize));
+        const audioFilesNoExt = DirectoryUtility.toNickname(audioFiles, (index === 0 && normalize));
         await addAudioFilesToDatabase(audioFiles, audioFilesNoExt);
 
         const associates = await associateFilesToDirectory(dir);

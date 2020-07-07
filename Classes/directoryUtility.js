@@ -47,12 +47,20 @@ class DirectoryUtility {
         return {uniqueToA: uniqueToA, uniqueToB: uniqueToB};
     }
 
+    // Removes the extension from an array of strings
+    // https://stackoverflow.com/a/47956767
     static removeExtension(directoryAudio, normalize) {
         if(normalize) {
             const lengthToSlice = '_norm.ogg'.length;
-            return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice).toLowerCase()});
+            return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice)});
         }
-        return directoryAudio.map((file) => {return file.split('.').slice(0, -1).join('.').toLowerCase()});
+        
+        return directoryAudio.map(file => {return file.substring(0, file.lastIndexOf('.')) || file});
+    }
+
+    // Formats strings for the nickname in database
+    static toNickname(fileName, normalize=false) {
+        return this.removeExtension(fileName, normalize).map(file => file.toLowerCase());
     }
 }
 

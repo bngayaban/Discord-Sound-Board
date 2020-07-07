@@ -4,6 +4,7 @@ const path = require('path');
 const {audioDirectories, maxFileSize, normalize} = require('../config.js');
 const {normalizeAudio} = require('../Classes/audioNormalizer.js');
 const {Audio, FileLocation} = require('../dbObjects.js');
+const DirectoryUtility  = require('../Classes/directoryUtility.js');
 
 async function add(message, args) {
     const attachment = message.attachments.first(); //assume only 1 attachment
@@ -25,14 +26,14 @@ async function add(message, args) {
 
     //check if nickname exists in database
     if(nickname) {
-        nickname = nickname.toLowerCase();
+        nickname = DirectoryUtility.toNickname(nickname);
         const query = await Audio.findOne({where:{nickname: nickname}});
         if(query) {
             message.channel.send(`${nickname} already exists in database. Using default instead.`);
-            nickname = fileName.split('.').slice(0, -1).join('.').toLowerCase();
+            nickname = DirectoryUtility.toNickname(fileName);
         }
     } else {
-        nickname = fileName.split('.').slice(0, -1).join('.').toLowerCase();
+        nickname = DirectoryUtility.toNickname(fileName);
     }
     
     try {

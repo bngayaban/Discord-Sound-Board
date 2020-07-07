@@ -55,7 +55,7 @@ async function getFilesToNormalize(directory) {
     // uses lowercase() because removingExtension() also makes it lowercase
     const filesToAddWithExt = filesToAdd.map(file => { 
         return audioFiles.find(af => {
-            if (af.substring(0, file.length).toLowerCase() === file) return af
+            if (af.substring(0, file.length) === file) return af
         })
     });
 

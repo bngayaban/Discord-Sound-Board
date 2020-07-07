@@ -1,8 +1,9 @@
 const {Audio, Tag} = require('../dbObjects.js');
+const DirectoryUtility = require('../Classes/directoryUtility.js');
 
 async function removeTag(message, args) {
     const tag = args.shift().toLowerCase();
-    const nickname = args.map(a => a.toLowerCase()); //one nickname or an array of nicknames
+    const nickname = DirectoryUtility.toNickname(args);//one nickname or an array of nicknames
     
     let dbAudio;
     try {
