@@ -35,6 +35,7 @@ module.exports = {
     description: 'Play a random sound based on tag',
     usage: '<tag>',
     requiredArgs: 1,
+    voice: true,
     execute(message, args) {
         return playTag(message, args);
     },
