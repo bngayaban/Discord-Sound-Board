@@ -50,17 +50,37 @@ class DirectoryUtility {
     // Removes the extension from an array of strings
     // https://stackoverflow.com/a/47956767
     static removeExtension(directoryAudio, normalize) {
+        let lengthToSlice;
         if(normalize) {
-            const lengthToSlice = '_norm.ogg'.length;
-            return directoryAudio.map((file) => {return file.slice(0, -lengthToSlice)});
+            lengthToSlice = '_norm.ogg'.length;
         }
-        
-        return directoryAudio.map(file => {return file.substring(0, file.lastIndexOf('.')) || file});
+        //for single string cases
+        if(typeof directoryAudio === 'string') {
+            return rE(directoryAudio, lengthToSlice);
+        }
+        // for array of strings
+        return directoryAudio.map(file => rE(file, lengthToSlice));
+        // the actual formatting, just remove the norm part or the extension
+        function rE(file, length) {
+            return file.substring(0, length || file.lastIndexOf('.')) || file;
+        }
     }
 
     // Formats strings for the nickname in database
+    // outer does the prepwork before formatting
+    // such as removing extensions
     static toNickname(fileName, normalize=false) {
-        return this.removeExtension(fileName, normalize).map(file => file.toLowerCase());
+        // for single string cases
+        if(typeof fileName === 'string') {
+            return tN(this.removeExtension(fileName, normalize));
+        }
+        // for array of strings
+        return this.removeExtension(fileName, normalize).map(file => tN(file));
+
+        // does the actual formatting
+        function tN(fileName) {
+            return fileName.toLowerCase();
+        }
     }
 }
 
