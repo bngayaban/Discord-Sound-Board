@@ -12,23 +12,20 @@ const sequelize = new Sequelize('database', 'username', 'password', {
     storage: locateDatabase(),
 });
 
-process.cwd === __dirname
-
-
-const Audio = sequelize.import('../models/audio.js');
-const FileLocation = sequelize.import('../models/location.js');
-const Tag = sequelize.import('../models/tag.js');
+const Audio = require('../models/audio.js')(sequelize, Sequelize.DataTypes);
+const FileLocation = require('../models/location.js')(sequelize, Sequelize.DataTypes);
+const Tag = require('../models/tag.js')(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 
-Audio.FileLocation = Audio.belongsTo(FileLocation);
+Audio.belongsTo(FileLocation);
 FileLocation.hasMany(Audio);
 
 Audio.belongsToMany(Tag, {through: 'AudioTag'});
 Tag.belongsToMany(Audio, {through: 'AudioTag'});
 
-const User = sequelize.import('../models/user.js');
-const Permission = sequelize.import('../models/permissions.js');
+const User = require('../models/user.js')(sequelize, Sequelize.DataTypes);
+const Permission = require('../models/permissions.js')(sequelize, Sequelize.DataTypes);
 
 User.belongsToMany(Permission, {as: 'Permission', through: 'Rules'});
 Permission.belongsToMany(User, {as: 'Permission', through: 'Rules'});
