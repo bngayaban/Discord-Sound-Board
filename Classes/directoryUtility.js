@@ -62,7 +62,7 @@ class DirectoryUtility {
         return directoryAudio.map(file => rE(file, lengthToSlice));
         // the actual formatting, just remove the norm part or the extension
         function rE(file, length) {
-            return file.substring(0, length || file.lastIndexOf('.')) || file;
+            return file.substring(0, file.length-length || file.lastIndexOf('.')) || file;
         }
     }
 

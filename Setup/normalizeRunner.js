@@ -42,9 +42,11 @@ async function getFilesToNormalize(directory) {
 
     // finds the non duplicates in each, but need to add extensions back
     const {uniqueToA: filesToAdd, uniqueToB: filesToRemove} = DirectoryUtility.findUniqueFiles(audioNoExt, normalizedFilesNoExt);
+
     // removes files
     for(const file of filesToRemove) {
         try{
+            console.log(`Removing: ${file}.`)
             await fs.unlink(join(normalizeAudio.getNormalizedDirectory(directory), file + '_norm.ogg'));
         } catch (e) {
             console.log(e);
