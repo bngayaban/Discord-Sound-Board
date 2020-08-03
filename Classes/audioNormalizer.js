@@ -58,7 +58,11 @@ async function normalizeAudio(directories, loudness, options={}) {
     const results = await Promise.allSettled(promises);
     console.log('Done');
 
-    return results;
+    return results.map(result => filterOutputDir(result));
+
+    function filterOutputDir(output) {
+        return ('info' in output.value) ? output.value.info : output.value.output;
+    }
 }
 
 normalizeAudio.defaultLoudness = () => {

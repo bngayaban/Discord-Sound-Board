@@ -114,7 +114,7 @@ async function normalizeFile(filename) {
         }
     );
 
-    const outputDir = output[0].value.info.output;
+    const outputDir = output[0];
     const outputFile = path.basename(outputDir);
     return {outputDir: outputDir, outputFile: outputFile};
 }
