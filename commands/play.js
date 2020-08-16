@@ -1,4 +1,4 @@
-const {Audio, FileLocation} = require("../dbObjects.js");
+const {Audio, FileLocation, Tag} = require("../dbObjects.js");
 const { Op } = require("sequelize");
 const {timeoutTime} = require('../config.js');
 const {join} = require('path');
@@ -7,13 +7,18 @@ const Server = require('../Classes/server.js');
 
 async function playSong(message, args) {
     const sfx = args;
-    const sfxQuery = await Audio.findOne({where:{[Op.or]: [{fileName: sfx}, {nickname: sfx}]}, include: FileLocation });
+    let sfxQuery = await findSong(sfx)
 
+    if(!sfxQuery) {
+        sfxQuery = await findSongFromTag(sfx);
+    }
+
+    if(!sfxQuery) {
+        return message.channel.send(`Song or tag ${sfx} not found.`);
+    }
+        
     const server = Server.getServer(message.guild.id);
 
-    if(!sfxQuery)
-        return message.channel.send(`Song ${sfx} not found.`);
-    
     server.queue.push([sfxQuery.get('fileName'), sfxQuery.audioDirectory.filePath]);
     console.log(server.queue);
     
@@ -27,6 +32,48 @@ async function playSong(message, args) {
         play(connection, message.channel, message.member.voice.channel, server);
     } catch(e) {
         console.log(e);
+    }
+}
+
+// Searches database for song by either filename or nickname
+async function findSong(sfx) {
+    const query = await Audio.findOne({
+        where:{
+            [Op.or]: [{fileName: sfx}, {nickname: sfx}]}, 
+            include: FileLocation 
+        });
+
+    return query;
+}
+
+// Searches database for a tag, then randomly picks a song from tag
+async function findSongFromTag(tag) {
+    const dbTag = await Tag.findOne({
+        where: {
+            tagName: tag,
+        },
+        include: {
+            model: Audio,
+            through: {
+                attributes: []
+            },
+            attributes: ['nickname']
+
+        }
+    });
+
+    console.log(JSON.stringify(dbTag, null, 2));
+
+    if(!dbTag || (dbTag.audios.length === 0))
+        return null;
+
+    const songNum = getRandomInt(dbTag.audios.length);
+    const songName = dbTag.audios[songNum].nickname
+
+    return findSong(songName);
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
     }
 }
 
@@ -73,7 +120,7 @@ function ordinalInt(n) {
 
 module.exports = {
     name: 'play',
-    description: 'Play a sound',
+    description: 'Play a sound using either its name or tag',
     requiredArgs: 1,
     usage: '<sound name>',
     voice: true,
