@@ -21,8 +21,8 @@
     "axios": "^0.19.2",
     "discord.js": "^12.2.0",
     "ffmpeg-normalize": "^1.8.0",
-    "ffmpeg-static": "^4.2.5",
-    "sequelize": "^6.3.0",
+    "ffmpeg-static": "^4.2.6",
+    "sequelize": "^6.3.3",
     "sodium": "^3.0.2",
     "sqlite3": "^5.0.0"
   }
