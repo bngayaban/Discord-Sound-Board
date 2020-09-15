@@ -61,7 +61,7 @@ async function normalizeAudio(directories, loudness, options={}) {
     return results.map(result => filterOutputDir(result));
 
     function filterOutputDir(output) {
-        return ('info' in output.value) ? output.value.info : output.value.output;
+        return ('info' in output.value) ? output.value.info.output : output.value.output;
     }
 }
 
