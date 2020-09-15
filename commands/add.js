@@ -9,7 +9,8 @@ const DirectoryUtility  = require('../Classes/directoryUtility.js');
 async function add(message, args) {
     const attachment = message.attachments.first(); //assume only 1 attachment
     const url = attachment.url
-    let fileName = url.split('/').pop();
+    const fileName = url.split('/').pop();
+    let normalizedFileName = fileName;
     let nickname = args[0];
     let outputDir = audioDirectories[0];
     const uid = message.author.id;
@@ -43,13 +44,13 @@ async function add(message, args) {
         
 
         if(normalize){
-            ({outputFile: fileName} = await normalizeFile(fileName));
-            console.log(`Successfully Normalized: ${fileName}`);
+            ({outputFile: normalizedFileName} = await normalizeFile(fileName));
+            console.log(`Successfully Normalized: ${fileName} as ${normalizedFileName}`);
         }
         
 
         //update database with new file and nickname
-        await updateDB (fileName, nickname, uid, outputDir);
+        await updateDB (normalizedFileName, nickname, uid, outputDir);
         return message.channel.send(`${fileName} added as ${nickname}`);
     } catch (error) {
         return message.channel.send(`${error}`);
