@@ -194,7 +194,7 @@ Tagging allows you to tag multiple songs with a tag, so that when you the play t
 
 - Removes tag from the given songs.
 
-`<playtag> <tag name>`
+`<play> <tag name>`
 
 - Play a random song tagged with the tag name.
 
