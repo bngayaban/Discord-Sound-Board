@@ -4,6 +4,31 @@
 
 This is a Discord Bot that plays sound effects locally from your computer to a voice channel. The sound effects must be obtained by the user, none are provided by default. This can also play music, provided their file path is given.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Installation](#installation)
+  - [Downloading and Installing Node.js](#downloading-and-installing-nodejs)
+  - [Setting Up A Developer Account](#setting-up-a-developer-account)
+  - [Calculating Permissions](#calculating-permissions)
+  - [Downloading and Installing Sound Board Bot](#downloading-and-installing-sound-board-bot)
+  - [Setting Up Sound Board Bot](#setting-up-sound-board-bot)
+  - [Normalizing Audio and Initializing Database](#normalizing-audio-and-initializing-database)
+    - [Adding Additional Audio After Setup](#adding-additional-audio-after-setup)
+    - [Removing Audio](#removing-audio)
+  - [Running Sound Board Bot](#running-sound-board-bot)
+- [Usage](#usage)
+  - [Music](#music)
+  - [Tagging](#tagging)
+  - [Permissions](#permissions)
+- [Customization](#customization)
+- [TODO](#todo)
+- [DONE](#done)
+- [Suggestions and modifications](#suggestions-and-modifications)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Installation
 
 ### Downloading and Installing Node.js
@@ -66,9 +91,27 @@ const audioDirectories = ['./Audio/',
                         ];
 ```
 
-If you want to use the default directory, paste the audio into the "audio" directory where the bot was unzipped.
+If you want to use the default directory, paste the audio into the "Audio" directory where the bot was unzipped.
 
-Once the directories are setup, you can initialize the bot's database. Open a powershell/terminal window in the directory the bot was installed and then run `node databaseInit.js`.
+### Normalizing Audio and Initializing Database
+
+Once the directories are setup, you can initialize the bot's database and normalize files. Open a powershell/terminal window in the directory the bot was installed and run `node setup.js`. This will run a script to normalize audio in the "Audio" directory and will then add all the files to the bot's database. Once the script finishes, the bot will be ready to run.
+
+#### Adding Additional Audio After Setup
+
+If after setup, you wish to add additional audio by:
+
+ - Adding a folder
+    - See example in Setting Up Sound Board Bot
+ - Adding a file to the "Audio" directory
+    - Copy the file to the directory
+
+ Then simply run the `setups.js` file again for the bot to recognize it.
+
+#### Removing Audio
+
+If you wish to remove Audio from the bot. Either delete the folder from `config.js` file or delete the audio from the "Audio" directory. Then rerun `setup.js`.
+
 
 ### Running Sound Board Bot
 
@@ -151,7 +194,7 @@ Tagging allows you to tag multiple songs with a tag, so that when you the play t
 
 - Removes tag from the given songs.
 
-`<playtag> <tag name>`
+`<play> <tag name>`
 
 - Play a random song tagged with the tag name.
 
@@ -189,9 +232,9 @@ All of this can be changed in the config.js file.
 
 - update documentation
 - permissions for changing nickname and tags
-
+- combine playtag() and play()
 - lint code
-- batch convert audio to ogg, will probably use ffmpeg-normalize
+
 
 
 ## DONE
@@ -204,6 +247,8 @@ All of this can be changed in the config.js file.
 - give users option to add their own files??
 - add other folders to scan besides ./Audio
 - add tag system and method for playing random song based on tag
+- batch convert audio to ogg, will probably use ffmpeg-normalize
+- setup file for installation
 
 ## Suggestions and modifications
 
