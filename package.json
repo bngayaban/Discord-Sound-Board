@@ -24,6 +24,6 @@
     "ffmpeg-static": "^4.2.7",
     "sequelize": "^6.3.5",
     "sodium": "^3.0.2",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^5.0.3"
   }
 }
